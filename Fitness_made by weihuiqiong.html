@@ -1,0 +1,2184 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-skin="green" data-dark="false">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="健身打卡助手：单文件本地健身打卡应用，记录饮水、运动、饮食、睡眠，支持 BMI 评估、身体数据台账与运动数据图表导出。">
+<meta name="theme-color" content="#1f9d6b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
+<title>健身打卡助手 · 每日运动饮食饮水记录</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231f9d6b'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='4.2' stroke-linecap='round'%3E%3Cpath d='M6 26v12M13 20v24M51 20v24M58 26v12M13 32h38'/%3E%3C/g%3E%3C/svg%3E">
+<style>
+/* ============ 五套皮肤变量（每套含日间/夜间） ============ */
+/* -- 绿色 -- */
+[data-skin="green"]{
+  --bg:#f3f6f4;--surface:#fff;--s2:#eef4f0;
+  --text:#15241b;--t2:#5a6b60;--t3:#8a998f;--border:#dce6df;
+  --c:#1f9d6b;--c-d:#137a51;--c-soft:#dcf3e8;--on-c:#fff;
+  --grad:linear-gradient(135deg,#1f9d6b,#137a51);
+}
+[data-skin="green"][data-dark="true"]{
+  --bg:#101713;--surface:#1a241e;--s2:#223028;
+  --text:#e8f0eb;--t2:#9fb0a6;--t3:#6f8076;--border:#2c3a32;
+  --c:#34b97f;--c-d:#2aa36f;--c-soft:#1d3a2c;--on-c:#fff;
+  --grad:linear-gradient(135deg,#34b97f,#1d7a53);
+}
+/* -- 粉色 -- */
+[data-skin="pink"]{
+  --bg:#fdf3f7;--surface:#fff;--s2:#fbeaf2;
+  --text:#2d1a24;--t2:#8a6175;--t3:#b08da0;--border:#f3d6e4;
+  --c:#e85f93;--c-d:#c93f74;--c-soft:#fcdceb;--on-c:#fff;
+  --grad:linear-gradient(135deg,#f07ba8,#d9477e);
+}
+[data-skin="pink"][data-dark="true"]{
+  --bg:#1b1218;--surface:#261a22;--s2:#32222c;
+  --text:#f4e7ee;--t2:#c098ab;--t3:#8a6b7c;--border:#3d2b36;
+  --c:#f07ba8;--c-d:#e05c92;--c-soft:#3d2433;--on-c:#fff;
+  --grad:linear-gradient(135deg,#e05c92,#a82f63);
+}
+/* -- 黑白 -- */
+[data-skin="mono"]{
+  --bg:#f4f4f4;--surface:#fff;--s2:#ececec;
+  --text:#141414;--t2:#5d5d5d;--t3:#9a9a9a;--border:#dcdcdc;
+  --c:#1a1a1a;--c-d:#000;--c-soft:#e4e4e4;--on-c:#fff;
+  --grad:linear-gradient(135deg,#333,#000);
+}
+[data-skin="mono"][data-dark="true"]{
+  --bg:#0e0e0e;--surface:#1c1c1c;--s2:#262626;
+  --text:#f0f0f0;--t2:#a0a0a0;--t3:#707070;--border:#333;
+  --c:#e8e8e8;--c-d:#fff;--c-soft:#2a2a2a;--on-c:#141414;
+  --grad:linear-gradient(135deg,#e8e8e8,#b8b8b8);
+}
+/* -- 蓝色 -- */
+[data-skin="blue"]{
+  --bg:#f1f5fb;--surface:#fff;--s2:#e7eef9;
+  --text:#16202e;--t2:#58708d;--t3:#8ba0b8;--border:#d7e2f0;
+  --c:#2f74c9;--c-d:#1c57a0;--c-soft:#dde9f8;--on-c:#fff;
+  --grad:linear-gradient(135deg,#3d86d8,#1c57a0);
+}
+[data-skin="blue"][data-dark="true"]{
+  --bg:#0e141c;--surface:#17202b;--s2:#1f2b39;
+  --text:#e8eef5;--t2:#99aec6;--t3:#6b8098;--border:#2a3948;
+  --c:#4a90dc;--c-d:#2f6fb5;--c-soft:#1e3048;--on-c:#fff;
+  --grad:linear-gradient(135deg,#4a90dc,#24558f);
+}
+/* -- 赛博（霓虹渐变） -- */
+[data-skin="cyber"]{
+  --bg:#eceefc;--surface:#fff;--s2:#e8e6fa;
+  --text:#14122b;--t2:#5b5888;--t3:#8d8ab5;--border:#d9d4f5;
+  --c:#7c3aed;--c-d:#4f1fd0;--c-soft:#e9e0fc;--on-c:#fff;
+  --grad:linear-gradient(135deg,#ff2e97 0%,#7c3aed 50%,#00d4ff 100%);
+}
+[data-skin="cyber"][data-dark="true"]{
+  --bg:#0a0616;--surface:#150f2b;--s2:#1e1540;
+  --text:#eae6ff;--t2:#a394d8;--t3:#6e5f9e;--border:#322659;
+  --c:#b061ff;--c-d:#7c3aed;--c-soft:#2a1f50;--on-c:#fff;
+  --grad:linear-gradient(135deg,#ff1e8e 0%,#6d28d9 45%,#06b6d4 100%);
+}
+/* 通用功能色（各皮肤共用） */
+:root{
+  --orange:#f08a3e;--orange-soft:#fde9d8;
+  --blue:#3a8dde;--blue-soft:#e0edfb;
+  --red:#d9534f;--red-soft:#fbe3e2;
+  --shadow:0 2px 10px rgba(21,36,27,.07);--shadow-lg:0 12px 32px rgba(21,36,27,.16);
+  --radius:18px;
+}
+/* 夜间模式下功能色底板加深，避免浅色块刺眼 */
+html[data-dark="true"]{
+  --orange-soft:#3a2a1c;--blue-soft:#1c2b3d;--red-soft:#3a2020;
+}
+html[data-dark="true"] .mode-tag.bad,
+html[data-dark="true"] .sleep-eval.bad,
+html[data-dark="true"] .sleep-link.bad,
+html[data-dark="true"] .bmi-tag.bad{color:#ff9b96}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+button,a,input,select{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+body{font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.6;transition:background .3s,color .3s;min-height:100vh}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select{font-family:inherit;font-size:16px}
+#appView{display:none}
+#appView.show{display:block}
+
+/* ============ 登录页 ============ */
+#authView{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:var(--grad)}
+.auth-card{background:var(--surface);border-radius:24px;width:100%;max-width:400px;
+  padding:30px 28px;box-shadow:0 24px 60px rgba(0,0,0,.25)}
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.auth-logo .badge{width:44px;height:44px;border-radius:13px;background:var(--c);
+  display:flex;align-items:center;justify-content:center}
+.auth-logo .badge svg{width:24px;height:24px;stroke:var(--on-c);fill:none;stroke-width:2}
+.auth-logo h1{font-size:20px;font-weight:800}
+.auth-sub{font-size:13px;color:var(--t2);margin-bottom:20px}
+.auth-tabs{display:flex;background:var(--s2);border-radius:12px;padding:4px;margin-bottom:20px}
+.auth-tabs button{flex:1;padding:9px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--t2);min-height:40px}
+.auth-tabs button.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+.auth-field{margin-bottom:13px}
+.auth-field label{display:block;font-size:13px;color:var(--t2);margin-bottom:5px;font-weight:600}
+.auth-field input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;
+  background:var(--surface);color:var(--text);outline:none}
+.auth-field input:focus{border-color:var(--c)}
+.code-row{display:flex;gap:9px}
+.code-row input{flex:1;min-width:0}
+.code-btn{flex:0 0 122px;padding:12px 8px;border-radius:12px;background:var(--c-soft);
+  color:var(--c-d);font-weight:700;font-size:13px;min-height:46px}
+.code-btn:disabled{opacity:.55;cursor:not-allowed}
+.forgot-row{display:flex;justify-content:flex-end;margin:-2px 0 12px}
+.forgot-link{background:none;border:none;color:var(--t2);font-size:13px;cursor:pointer;padding:2px}
+.forgot-link:hover{color:var(--c)}
+.pick-btn{width:100%;margin-top:10px;padding:12px;border-radius:12px;border:1.5px dashed var(--border);
+  background:var(--surface);color:var(--t2);font-size:14px;cursor:pointer}
+.pick-btn:hover{border-color:var(--c);color:var(--c)}
+.pick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.pick-chip{padding:11px 6px;border-radius:12px;border:1.5px solid var(--border);background:var(--s2);
+  color:var(--text);font-size:13.5px;cursor:pointer}
+.pick-chip:hover{border-color:var(--c);background:var(--c-soft);color:var(--c)}
+.auth-main-btn{width:100%;padding:13px;border-radius:12px;background:var(--c);color:var(--on-c);
+  font-weight:700;font-size:15px;margin-top:6px;min-height:48px}
+.auth-switch{text-align:center;font-size:13px;color:var(--t2);margin-top:16px}
+.auth-switch button{color:var(--c);font-weight:700}
+.auth-demo{font-size:11.5px;color:var(--t3);text-align:center;margin-top:14px;line-height:1.7}
+
+/* ============ 顶部 ============ */
+.app{max-width:860px;margin:0 auto;padding:16px 16px 90px}
+.header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:8px 4px 14px;flex-wrap:wrap;position:relative}
+.header h1{font-size:22px;font-weight:800;letter-spacing:.5px}
+.header .date{font-size:14px;color:var(--t2);margin-top:2px}
+.header-right{display:flex;align-items:center;gap:10px}
+.streak-badge{display:flex;align-items:center;gap:6px;background:var(--orange-soft);color:var(--orange);
+  font-weight:700;font-size:14px;padding:7px 13px;border-radius:999px}
+.icon-btn{width:42px;height:42px;border-radius:50%;background:var(--surface);box-shadow:var(--shadow);
+  display:flex;align-items:center;justify-content:center;transition:transform .15s;position:relative}
+.icon-btn:active{transform:scale(.9)}
+.icon-btn svg{width:20px;height:20px;stroke:var(--text);fill:none;stroke-width:2}
+.user-chip{display:flex;align-items:center;gap:7px;background:var(--surface);box-shadow:var(--shadow);
+  padding:7px 12px;border-radius:999px;font-size:13px;font-weight:600}
+.user-chip .avatar{width:26px;height:26px;border-radius:50%;background:var(--c);color:var(--on-c);
+  display:flex;align-items:center;justify-content:center;font-size:13px}
+.logout-link{font-size:12px;color:var(--t3);font-weight:500;padding:4px}
+
+/* 风格选择面板 */
+.skin-panel{position:absolute;top:64px;right:8px;background:var(--surface);border-radius:16px;
+  box-shadow:var(--shadow-lg);padding:10px;width:160px;z-index:80;display:none}
+.skin-panel.show{display:block;animation:pop .18s ease}
+.skin-panel button{width:100%;padding:12px 10px;border-radius:11px;font-size:16px;font-weight:800;
+  text-align:center;min-height:44px;color:var(--text)}
+.skin-panel button.active{background:var(--c-soft);color:var(--c-d)}
+/* 夜间模式下风格名称使用各自的亮色，保证清晰可读 */
+html[data-dark="true"] .skin-panel button{color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+html[data-dark="true"] .skin-panel button[data-skin="pink"]{color:#ff9ecb}
+html[data-dark="true"] .skin-panel button[data-skin="mono"]{color:#ffffff}
+html[data-dark="true"] .skin-panel button[data-skin="green"]{color:#5cf0a8}
+html[data-dark="true"] .skin-panel button[data-skin="blue"]{color:#7cc4ff}
+html[data-dark="true"] .skin-panel button[data-skin="cyber"]{color:#d9a6ff}
+html[data-dark="true"] .skin-panel button.active{background:rgba(128,128,128,.2);color:#fff}
+html[data-dark="true"] .skin-panel button.active[data-skin="pink"]{color:#ff9ecb}
+html[data-dark="true"] .skin-panel button.active[data-skin="mono"]{color:#fff}
+html[data-dark="true"] .skin-panel button.active[data-skin="green"]{color:#5cf0a8}
+html[data-dark="true"] .skin-panel button.active[data-skin="blue"]{color:#7cc4ff}
+html[data-dark="true"] .skin-panel button.active[data-skin="cyber"]{color:#d9a6ff}
+
+/* 用户类型选择 */
+.type-picker{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:16px}
+.type-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);
+  padding:15px 16px;display:flex;gap:12px;align-items:flex-start;text-align:left;transition:all .2s;min-height:44px}
+.type-card .ticon{width:40px;height:40px;border-radius:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.type-card .ticon svg{width:21px;height:21px;stroke:var(--on-c);fill:none;stroke-width:2}
+.type-card.pro .ticon{background:var(--text)}
+.type-card.normal .ticon{background:var(--c)}
+.type-card h3{font-size:14.5px;font-weight:700}
+.type-card p{font-size:12px;color:var(--t2);line-height:1.5}
+.type-card.selected{border-color:var(--c);background:var(--c-soft)}
+.type-card.pro.selected{border-color:var(--text)}
+
+/* 总览 */
+.overview{background:var(--grad);border-radius:var(--radius);padding:22px;color:var(--on-c);
+  display:flex;align-items:center;gap:20px;box-shadow:var(--shadow);margin-bottom:16px}
+.ring-wrap{position:relative;width:104px;height:104px;flex-shrink:0}
+.ring-wrap svg{width:104px;height:104px;transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:rgba(128,128,128,.22);stroke-width:10}
+.ring-fg{fill:none;stroke:var(--on-c);stroke-width:10;stroke-linecap:round;stroke-dasharray:283;
+  stroke-dashoffset:283;transition:stroke-dashoffset .6s ease}
+.ring-text{position:absolute;top:0;right:0;bottom:0;left:0;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-text b{font-size:26px;line-height:1.1}.ring-text span{font-size:11px;opacity:.85}
+.overview-info{flex:1;min-width:0}
+.overview-info h2{font-size:18px;font-weight:700;margin-bottom:4px}
+.overview-info p{font-size:13px;opacity:.92;margin-bottom:12px}
+.checkin-btn{background:var(--on-c);color:var(--c-d);font-weight:700;font-size:14px;
+  padding:9px 18px;border-radius:999px;transition:transform .15s,opacity .2s}
+.checkin-btn:active{transform:scale(.95)}
+.checkin-btn:disabled{opacity:.55;cursor:not-allowed}
+.checkin-btn.done{background:rgba(128,128,128,.2);color:var(--on-c)}
+.total-burn{margin-top:12px;background:rgba(128,128,128,.16);border-radius:12px;padding:10px 14px;
+  font-size:12.5px;display:none}
+.total-burn.show{display:block}
+.total-burn b{font-size:17px}
+.total-burn .tb-row{display:flex;justify-content:space-between;opacity:.92;margin-top:2px}
+
+/* 竖排单列 */
+.grid{display:grid;grid-template-columns:1fr;gap:16px}
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap}
+.card-title{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:700}
+.card-title .dot{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.card-title .dot svg{width:18px;height:18px;stroke:var(--on-c);fill:none;stroke-width:2}
+.dot.water{background:var(--blue)}.dot.sport{background:var(--c)}.dot.food{background:var(--orange)}
+.dot.history{background:var(--t2)}
+.head-actions{display:flex;align-items:center;gap:9px}
+.hist-btn{background:var(--c-soft);color:var(--c-d);font-weight:700;font-size:13px;
+  padding:9px 18px;border-radius:12px;min-height:40px}
+.mode-tag{font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:99px}
+.mode-tag.pro{background:var(--s2);color:var(--text)}
+.mode-tag.normal{background:var(--c-soft);color:var(--c-d)}
+.mode-tag.bad{background:var(--red-soft);color:var(--red)}
+
+/* 进度条 */
+.progress{height:10px;background:var(--s2);border-radius:999px;overflow:hidden;margin:10px 0 6px}
+.progress i{display:block;height:100%;border-radius:999px;transition:width .5s ease}
+.progress.water i{background:linear-gradient(90deg,#5aa9e8,var(--blue))}
+.progress.food i{background:linear-gradient(90deg,#f5a866,var(--orange))}
+.progress.goal-over i{background:linear-gradient(90deg,#e06b67,#d9534f)}
+.meta-row{display:flex;justify-content:space-between;font-size:13px;color:var(--t2)}
+.meta-row b{color:var(--text)}
+
+/* 饮水按钮 */
+.water-btns{display:flex;gap:8px;margin-top:14px}
+.water-btn{flex:1;padding:11px 4px;border-radius:13px;font-weight:700;font-size:13px;
+  background:var(--blue-soft);color:var(--blue);display:flex;flex-direction:column;align-items:center;
+  gap:2px;transition:transform .12s;min-height:44px;justify-content:center}
+.water-btn:active{transform:scale(.95)}
+.water-btn small{font-weight:500;font-size:10.5px;opacity:.8}
+.water-btn.undo{background:var(--s2);color:var(--t2)}
+
+/* 表单 */
+.add-form{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.add-form input{flex:1;min-width:110px;padding:10px 13px;border:1.5px solid var(--border);
+  border-radius:12px;background:var(--surface);color:var(--text);outline:none}
+.add-form input:focus{border-color:var(--c)}
+.add-form input.num{flex:0 0 96px}
+.add-btn{background:var(--c);color:var(--on-c);font-weight:700;font-size:14px;padding:10px 18px;
+  border-radius:12px;transition:transform .12s;min-height:44px}
+.add-btn:active{transform:scale(.95)}
+.field-error{font-size:12px;color:var(--red);margin:-6px 0 8px 2px;display:none}
+.field-error.show{display:block}
+
+.weight-btn{background:var(--s2);border-radius:999px;padding:7px 14px;font-size:13px;
+  color:var(--t2);min-height:38px;flex-shrink:0}
+.sport-summary{background:var(--c-soft);color:var(--c-d);font-size:13px;font-weight:600;
+  padding:9px 14px;border-radius:12px;margin-bottom:12px}
+.sport-summary b{font-size:15px}
+
+/* 列表 */
+.list{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto}
+.item{display:flex;align-items:center;gap:11px;padding:11px 12px;background:var(--s2);
+  border-radius:13px;animation:slideIn .25s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.check{width:24px;height:24px;border-radius:50%;border:2px solid var(--t3);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;transition:all .15s;min-width:24px}
+.check svg{width:13px;height:13px;stroke:var(--on-c);stroke-width:3;fill:none;opacity:0}
+.item.done .check{background:var(--c);border-color:var(--c)}
+.item.done .check svg{opacity:1}
+.item-body{flex:1;min-width:0}
+.item-name{font-size:14.5px;font-weight:600;word-break:break-all}
+.item.done .item-name{text-decoration:line-through;color:var(--t3)}
+.item-sub{font-size:12px;color:var(--t3)}
+.item.done .item-sub{color:var(--c-d)}
+.del-btn{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;color:var(--t3)}
+.del-btn:hover{background:var(--red-soft);color:var(--red)}
+.del-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2}
+.food-item .kcal{font-weight:700;font-size:13px;color:var(--orange);flex-shrink:0}
+.food-item.goal-over .kcal{color:var(--red)}
+.empty{text-align:center;padding:30px 12px;color:var(--t3)}
+.empty svg{width:46px;height:46px;stroke:var(--border);fill:none;stroke-width:1.5;margin-bottom:10px}
+.empty p{font-size:13.5px}.empty small{display:block;font-size:12px;margin-top:3px}
+
+/* 饮食提示小字 */
+.food-tip{font-size:12px;opacity:.6;margin:2px 0 6px}
+
+/* 历史/近三月 */
+.history-list{display:flex;flex-direction:column;gap:8px}
+.hist-row{display:flex;align-items:center;gap:12px;padding:11px 13px;background:var(--s2);
+  border-radius:13px;font-size:13px}
+.hist-date{font-weight:700;min-width:88px;flex-shrink:0}
+.hist-date small{display:block;font-weight:400;font-size:11px;color:var(--t3)}
+.hist-bars{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}
+.hbar{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--t2)}
+.hbar span{min-width:30px;flex-shrink:0}
+.hbar em{flex:1;display:block;height:6px;border-radius:99px;background:var(--surface);min-width:30px;overflow:hidden}
+.hbar i{display:block;height:100%;border-radius:99px}
+.hbar b{flex-shrink:0;font-weight:500;min-width:52px;text-align:right}
+.hbar.w i{background:var(--blue)}.hbar.s i{background:var(--c)}.hbar.f i{background:var(--orange)}
+.hist-check{font-size:18px;flex-shrink:0}
+
+/* Toast / Modal */
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(80px);
+  background:var(--text);color:var(--bg);padding:12px 22px;border-radius:999px;font-size:14px;
+  font-weight:600;opacity:0;transition:all .3s;z-index:100;box-shadow:var(--shadow-lg);
+  max-width:88vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.success{background:var(--c-d);color:var(--on-c)}
+.toast.error{background:var(--red);color:#fff}
+.modal-mask{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;background:rgba(0,0,0,.45);z-index:90;display:none;
+  align-items:center;justify-content:center;padding:24px}
+.modal-mask.show{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius);padding:24px;max-width:360px;width:100%;
+  box-shadow:var(--shadow-lg);animation:pop .2s ease}
+@keyframes pop{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
+.modal h3{font-size:17px;margin-bottom:8px}
+.modal p{font-size:14px;color:var(--t2);margin-bottom:18px}
+.modal-btns{display:flex;gap:10px}
+.modal-btns button{flex:1;padding:11px;border-radius:12px;font-weight:700;font-size:14px;min-height:44px}
+.modal-cancel{background:var(--s2);color:var(--t2)}
+.modal-confirm{background:var(--red);color:#fff}
+.modal input.modal-input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;
+  background:var(--surface);color:var(--text);outline:none;margin-bottom:10px}
+.modal input.modal-input:focus{border-color:var(--c)}
+.modal .modal-hint{font-size:12px;color:var(--t3);margin-bottom:14px}
+.modal select.modal-input{width:100%}
+.modal.wide{max-width:560px;max-height:90vh;overflow-y:auto}
+.month-list{max-height:62vh;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.month-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--s2);border-radius:10px;font-size:12.5px}
+.month-row .md{font-weight:700;min-width:72px}
+.month-row .ms{flex:1;color:var(--t2)}
+.month-title{font-size:14px;font-weight:800;margin:12px 0 6px}
+.month-row.detailed{flex-direction:column;align-items:stretch;gap:8px;padding:11px 12px}
+.mrow-top{display:flex;align-items:center;gap:10px}
+.mrow-top .md{font-weight:800;font-size:13px;min-width:44px}
+.mrow-top .mplan{flex:1;color:var(--t2);font-size:12px}
+.mrow-top .mcheck{font-size:12px;color:var(--c);font-weight:700}
+.mrow-top .mcheck.no{color:var(--t3);font-weight:400}
+.mrow-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
+.mrow-grid .mg{font-size:12px;color:var(--t2)}
+.mrow-grid .mg b{color:var(--text);font-weight:700}
+
+/* 奖励大拇指 */
+.reward-pop{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;z-index:96;display:none;align-items:center;justify-content:center;pointer-events:none}
+.reward-pop.show{display:flex}
+.reward-card{background:var(--surface);border-radius:22px;padding:26px 34px;text-align:center;
+  box-shadow:var(--shadow-lg);animation:pop .3s ease}
+.reward-card svg{width:74px;height:74px;margin-bottom:8px}
+.reward-card h3{font-size:19px;font-weight:800;color:var(--text)}
+
+.celebrate{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;pointer-events:none;z-index:95;overflow:hidden}
+.confetti{position:absolute;top:-14px;border-radius:2px;animation:fall 1.8s linear forwards}
+.confetti.round{border-radius:50%}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+.footer-note{text-align:center;font-size:12px;color:var(--t3);margin-top:26px;line-height:1.8}
+
+/* ============ 睡眠记录 ============ */
+.dot.sleep{background:linear-gradient(135deg,#8b7cf6,#4f3fc9)}
+.sleep-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sleep-field{display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:var(--t2);font-weight:600}
+.sleep-field.full{grid-column:1/-1}
+.sleep-field input{padding:10px 12px;border:1.5px solid var(--border);border-radius:12px;
+  background:var(--surface);color:var(--text);outline:none;font-size:16px;min-height:44px;font-variant-numeric:tabular-nums}
+.sleep-field input:focus{border-color:var(--c)}
+.sleep-input-row{display:flex;align-items:center;gap:8px}
+.sleep-input-row input{flex:1;min-width:0;max-width:170px}
+.sleep-input-row span{flex:none;font-size:12.5px;color:var(--t2);font-weight:500}
+.sleep-result{margin-top:12px;background:var(--s2);border-radius:14px;padding:12px 10px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center}
+.sleep-result .sr{display:flex;flex-direction:column;gap:1px;min-width:0}
+.sleep-result .sr b{font-size:16.5px;color:var(--text);line-height:1.35;font-variant-numeric:tabular-nums}
+.sleep-result .sr small{font-size:11px;color:var(--t3);font-weight:500}
+.sleep-eval{margin-top:10px;font-size:13px;border-radius:12px;padding:9px 13px;font-weight:700;display:none;line-height:1.5}
+.sleep-eval.show{display:block}
+.sleep-eval.good{background:var(--c-soft);color:var(--c-d)}
+.sleep-eval.bad{background:var(--red-soft);color:var(--red)}
+.sleep-link{font-size:12.5px;line-height:1.65;border-radius:12px;padding:9px 13px;margin-top:10px;display:none}
+.sleep-link.show{display:block}
+.sleep-link.bad{background:var(--red-soft);color:var(--red)}
+.sleep-link.good{background:var(--c-soft);color:var(--c-d)}
+.sleep-actions{display:flex;gap:8px;margin-top:12px}
+.sleep-actions .add-btn{flex:1}
+.hbar.z i{background:#8b7cf6}
+
+/* 睡眠表扬动画 */
+.sleep-pop{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;z-index:97;display:none;align-items:center;justify-content:center;pointer-events:none;overflow:hidden}
+.sleep-pop.show{display:flex}
+.sleep-praise{background:var(--surface);border-radius:24px;padding:26px 34px 22px;text-align:center;
+  box-shadow:var(--shadow-lg);animation:pop .3s ease;position:relative;max-width:86vw}
+.sleep-praise .moon{width:72px;height:72px;margin:0 auto 6px;display:block;animation:floaty 2.2s ease-in-out infinite}
+.sleep-praise h3{font-size:18px;font-weight:800}
+.sleep-praise p{font-size:12.5px;color:var(--t2);margin-top:4px}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.spark{position:absolute;width:9px;height:9px;background:#ffd166;border-radius:50%;
+  animation:twinkle 1.4s ease-in-out infinite;pointer-events:none}
+@keyframes twinkle{0%,100%{opacity:0;transform:scale(.3)}50%{opacity:1;transform:scale(1.15)}}
+
+/* ============ 个人档案 / 身体数据台账 ============ */
+.user-chip{border:none;cursor:pointer;transition:transform .15s}
+.user-chip:active{transform:scale(.96)}
+.user-chip .chev{width:13px;height:13px;stroke:var(--t3);fill:none;stroke-width:2.6;flex:none}
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.profile-field{display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:var(--t2);font-weight:600}
+.profile-field input,.profile-field select{padding:10px 12px;border:1.5px solid var(--border);border-radius:12px;
+  background:var(--surface);color:var(--text);outline:none;font-size:16px;min-height:44px;width:100%}
+.profile-field input:focus,.profile-field select:focus{border-color:var(--c)}
+.bmi-box{margin-top:2px;border-radius:14px;padding:14px;background:var(--s2);display:none}
+.bmi-box.show{display:block}
+.bmi-main{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.bmi-main b{font-size:27px;color:var(--c);line-height:1.1;font-variant-numeric:tabular-nums}
+.bmi-main span.bmi-tag{font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px}
+.bmi-tag.low{background:var(--blue-soft);color:var(--blue)}
+.bmi-tag.ok{background:var(--c-soft);color:var(--c-d)}
+.bmi-tag.warn{background:var(--orange-soft);color:var(--orange)}
+.bmi-tag.bad{background:var(--red-soft);color:var(--red)}
+.bmi-advice{font-size:12.5px;color:var(--t2);margin-top:7px;line-height:1.65}
+.profile-sep{height:1px;background:var(--border);margin:18px 0 14px}
+.ledger-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.ledger-form .add-btn{grid-column:1/-1;min-height:42px}
+.trend-box{background:var(--s2);border-radius:14px;padding:10px 8px 4px;margin-bottom:8px}
+.trend-head{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--t2);
+  padding:0 6px 4px;font-weight:600}
+.trend-head b{color:var(--text);font-size:13px}
+.ledger-list{display:flex;flex-direction:column;gap:6px;max-height:190px;overflow-y:auto}
+.ledger-row{display:flex;align-items:center;gap:8px;padding:8px 11px;background:var(--s2);border-radius:10px;font-size:12.5px}
+.ledger-row .ld{min-width:76px;color:var(--t2);font-variant-numeric:tabular-nums}
+.ledger-row .lw{font-weight:700;color:var(--text)}
+.ledger-row .lwaist{color:var(--t2)}
+.ledger-row .del-btn{width:30px;height:30px;margin-left:auto}
+.ledger-empty{text-align:center;font-size:12.5px;color:var(--t3);padding:12px 6px}
+
+/* ============ 图表 / 导出 ============ */
+.hist-btn.chart-btn{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;padding:9px 13px}
+.hist-btn.chart-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2.2;flex:none}
+.chart-tabs{display:flex;background:var(--s2);border-radius:12px;padding:4px;margin-bottom:12px}
+.chart-tabs button{flex:1;padding:8px 6px;border-radius:9px;font-size:13px;font-weight:700;color:var(--t2);min-height:38px}
+.chart-tabs button.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+.chart-box{background:var(--s2);border-radius:14px;padding:12px 10px 8px;margin-bottom:12px}
+.chart-title{font-size:13px;font-weight:800;margin-bottom:2px;padding:0 4px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.chart-title small{font-size:11.5px;color:var(--t3);font-weight:500}
+.chart-svg{width:100%;height:auto;display:block;overflow:visible}
+.chart-svg text{font-family:inherit;font-size:9px}
+.chart-svg .axis{stroke:var(--border);stroke-width:1}
+.chart-svg .grid{stroke:var(--border);stroke-width:1;stroke-dasharray:3 4;opacity:.7}
+.chart-svg .bar{fill:var(--c);rx:3}
+.chart-svg .bar-empty{fill:var(--border)}
+.chart-svg .line{fill:none;stroke:var(--c);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.chart-svg .dot{fill:var(--surface);stroke:var(--c);stroke-width:2.2}
+.chart-svg .lbl{fill:var(--t3)}
+.chart-svg .val{fill:var(--t2);font-weight:600}
+.chart-svg .val-strong{fill:var(--c);font-weight:800}
+.chart-svg .area{fill:var(--c);opacity:.12}
+.chart-legend{font-size:11.5px;color:var(--t3);padding:2px 4px 0}
+.export-hint{font-size:11.5px;color:var(--t3);line-height:1.6;margin:2px 2px 10px}
+.export-btn{width:100%;padding:12px;border-radius:12px;background:var(--c);color:var(--on-c);
+  font-weight:700;font-size:14px;min-height:46px;display:flex;align-items:center;justify-content:center;gap:8px}
+.export-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2}
+
+/* ============ 小屏适配 ============ */
+@media (max-width:600px){
+  .header-right{width:100%;justify-content:flex-start;gap:6px}
+  .header{gap:8px;padding-bottom:10px}
+  .app{padding-left:14px;padding-right:14px}
+  .streak-badge{white-space:nowrap;padding:6px 10px;font-size:13px}
+  .user-chip{padding:6px 9px;font-size:12.5px}
+  .icon-btn{width:38px;height:38px}
+  .logout-link{font-size:12px;padding:4px 6px;white-space:nowrap;flex:none}
+  .mode-tag{font-size:10.5px;padding:3px 8px}
+  .card{padding:16px}
+  .head-actions{width:100%;justify-content:flex-start}
+  .head-actions .hist-btn{flex:1;display:inline-flex;align-items:center;justify-content:center}
+  .head-actions .hist-btn.chart-btn{flex:1.7;font-size:11.5px}
+}
+@media (max-width:480px){
+  .type-picker{grid-template-columns:1fr}
+  .type-card{padding:13px 14px}
+  .overview{padding:18px;gap:14px}
+  .overview-info h2{font-size:17px}
+  .ring-wrap,.ring-wrap svg{width:92px;height:92px}
+  .sleep-result .sr b{font-size:15px}
+}
+</style>
+</head>
+<body>
+<!-- ================= 登录视图 ================= -->
+<div id="authView">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9v6M4.5 7v10M19.5 7v10M22 9v6M4.5 12h15"/></svg></span>
+      <h1>健身打卡助手</h1>
+    </div>
+    <p class="auth-sub">登录后开始记录每天的运动、饮食与饮水</p>
+    <div class="auth-tabs" id="authTabs">
+      <button data-tab="pwd" class="active">账号密码登录</button>
+      <button data-tab="sms">短信登录</button>
+    </div>
+    <form id="pwdForm">
+      <div class="auth-field"><label>账号（手机号）</label>
+        <input type="tel" id="pwdAccount" placeholder="请输入注册时的手机号" maxlength="11"></div>
+      <div class="auth-field"><label>密码</label>
+        <input type="password" id="pwdPassword" placeholder="请输入密码" maxlength="20"></div>
+      <div class="forgot-row"><button type="button" class="forgot-link" id="openForgot">忘记密码？</button></div>
+      <button type="submit" class="auth-main-btn">登 录</button>
+    </form>
+    <form id="smsForm" style="display:none">
+      <div class="auth-field"><label>手机号</label>
+        <input type="tel" id="smsPhone" placeholder="请输入 11 位手机号" maxlength="11"></div>
+      <div class="auth-field"><label>验证码</label>
+        <div class="code-row">
+          <input type="text" id="smsCode" placeholder="6 位验证码" maxlength="6">
+          <button type="button" class="code-btn" id="sendCodeBtn">获取验证码</button>
+        </div></div>
+      <button type="submit" class="auth-main-btn">登 录</button>
+    </form>
+    <form id="regForm" style="display:none">
+      <div class="auth-field"><label>手机号</label>
+        <input type="tel" id="regPhone" placeholder="请输入 11 位手机号" maxlength="11"></div>
+      <div class="auth-field"><label>短信验证码</label>
+        <div class="code-row">
+          <input type="text" id="regCode" placeholder="6 位验证码" maxlength="6">
+          <button type="button" class="code-btn" id="regSendBtn">获取验证码</button>
+        </div></div>
+      <div class="auth-field"><label>设置密码（用于账号密码登录）</label>
+        <input type="password" id="regPassword" placeholder="6-20 位密码" maxlength="20"></div>
+      <button type="submit" class="auth-main-btn">注册并进入</button>
+    </form>
+    <div class="auth-switch" id="authSwitch">
+      <span id="switchText">还没有账号？</span>
+      <button id="goReg" type="button">立即注册</button>
+      <button id="goLogin" type="button" style="display:none">返回登录</button>
+    </div>
+    <p class="auth-demo">演示环境：验证码不会真实发送短信<br>点击“获取验证码”后，验证码将显示在屏幕提示中</p>
+  </div>
+</div>
+<!-- ================= 主应用视图 ================= -->
+<div id="appView">
+<div class="app">
+  <header class="header">
+    <div>
+      <h1>健身打卡助手</h1>
+      <div class="date" id="todayLabel"></div>
+    </div>
+    <div class="header-right">
+      <div class="streak-badge" title="连续完成打卡的天数">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1.5 4.5-1.5 7 0 1.4 1.1 2.5 2.5 2.5s2.5-1.1 2.5-2.5c0-.6-.2-1.2-.5-1.7C16.8 9 18 11 18 13a6 6 0 1 1-12 0c0-4.5 3.5-6.5 6-11z"/></svg>
+        连续 <b id="streakNum">0</b> 天
+      </div>
+      <button class="user-chip" id="profileBtn" title="个人档案 / 身体数据台账" aria-label="打开个人档案">
+        <span class="avatar" id="userAvatar">我</span>
+        <span id="userPhoneLabel"></span>
+        <svg class="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <!-- 风格选择按钮（夜间图标左边） -->
+      <button class="icon-btn" id="skinBtn" title="选择网页风格" aria-label="选择网页风格">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none"/></svg>
+      </button>
+      <button class="icon-btn" id="themeBtn" title="切换夜间模式" aria-label="切换夜间模式">
+        <svg id="iconMoon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+      <button class="logout-link" id="logoutBtn">退出</button>
+    </div>
+    <!-- 风格选择面板（独立于按钮） -->
+    <div class="skin-panel" id="skinPanel">
+      <button type="button" data-skin="pink">粉色</button>
+      <button type="button" data-skin="mono">黑白</button>
+      <button type="button" data-skin="green">绿色</button>
+      <button type="button" data-skin="blue">蓝色</button>
+      <button type="button" data-skin="cyber">赛博</button>
+    </div>
+  </header>
+
+  <!-- 用户类型选择 -->
+  <div class="type-picker" id="typePicker">
+    <button class="type-card pro" data-type="pro">
+      <span class="ticon"><svg viewBox="0 0 24 24"><path d="M6 5v14M18 5v14M3 9v6M21 9v6M6 12h12"/></svg></span>
+      <span><h3>专业健身人群</h3><p>长期规律训练，饮食精确到克数</p></span>
+    </button>
+    <button class="type-card normal" data-type="normal">
+      <span class="ticon"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+      <span><h3>普通运动爱好者</h3><p>喜欢运动、保持健康，按份估算</p></span>
+    </button>
+  </div>
+
+  <!-- 今日总览 -->
+  <section class="overview">
+    <div class="ring-wrap">
+      <svg viewBox="0 0 100 100">
+        <circle class="ring-bg" cx="50" cy="50" r="45"/>
+        <circle class="ring-fg" id="ringFg" cx="50" cy="50" r="45"/>
+      </svg>
+      <div class="ring-text"><b id="ringPct">0%</b><span>今日完成</span></div>
+    </div>
+    <div class="overview-info">
+      <h2 id="overviewTitle">今天也要加油</h2>
+      <p id="overviewTip">完成饮水、运动和饮食目标后即可打卡</p>
+      <button class="checkin-btn" id="checkinBtn">完成今日打卡</button>
+    </div>
+  </section>
+
+  <section class="total-burn" id="totalBurn">
+    <div>今日总消耗约 <b id="totalBurnKcal">0</b> kcal</div>
+    <div class="tb-row"><span>基础代谢 <b id="bmrKcal">0</b></span><span>运动净消耗 <b id="netSportKcal">0</b></span></div>
+  </section>
+
+  <div class="grid" style="margin-top:16px">
+    <!-- 饮水 -->
+    <section class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="dot water"><svg viewBox="0 0 24 24"><path d="M12 2.7S5 10 5 14.5a7 7 0 0 0 14 0C19 10 12 2.7 12 2.7z"/></svg></span>饮水</div>
+      </div>
+      <div class="progress water"><i id="waterBar" style="width:0%"></i></div>
+      <div class="meta-row"><span>已喝 <b id="waterMl">0</b> ml</span><span>目标 <b id="waterGoal">2000</b> ml</span></div>
+      <div class="water-btns">
+        <button class="water-btn" data-add="250">+250 ml<small>约一杯</small></button>
+        <button class="water-btn" data-add="500">+500 ml<small>约一瓶</small></button>
+        <button class="water-btn" id="waterCustom">自定义<small>其他毫升</small></button>
+        <button class="water-btn undo" id="waterUndo">撤销一杯</button>
+      </div>
+    </section>
+
+    <!-- 运动 -->
+    <section class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="dot sport"><svg viewBox="0 0 24 24"><path d="M2.5 9v6M5 7v10M19 7v10M21.5 9v6M5 12h14"/></svg></span>运动任务</div>
+        <button class="weight-btn" id="weightBtn">身体数据台账</button>
+      </div>
+      <div class="sport-summary" id="sportSummary">完成运动后可累计消耗热量</div>
+      <form class="add-form" id="sportForm">
+        <input type="text" id="sportName" placeholder="运动项目，如：跑步、跳绳、游泳" maxlength="20">
+        <input type="number" class="num" id="sportMin" placeholder="分钟" min="1" max="600">
+        <button type="submit" class="add-btn">添加</button>
+      </form>
+      <button type="button" class="pick-btn" id="sportPickBtn">选择运动项目</button>
+      <div class="field-error" id="sportErr">请填写运动项目和时长（1-600 分钟）</div>
+      <div class="list" id="sportList"></div>
+    </section>
+
+    <!-- 饮食 -->
+    <section class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="dot food"><svg viewBox="0 0 24 24"><path d="M5 3v8a3 3 0 0 0 6 0V3M8 3v18M16 3c2 2 3 5 3 9s-1 6-3 6"/></svg></span>饮食记录</div>
+        <span class="mode-tag" id="modeTag">请先选择人群类型</span>
+      </div>
+      <div class="meta-row">
+        <span>今日摄入 <b id="foodKcal">0</b> / <span id="foodGoal">1800</span> kcal</span>
+        <span>蛋白质 <b id="foodProtein">0</b> g</span>
+      </div>
+      <div class="progress food" id="foodProgress"><i id="foodBar" style="width:0%"></i></div>
+
+      <form class="add-form" id="foodFormPro" style="margin-top:14px;display:none">
+        <input type="text" id="foodNamePro" placeholder="食物名称，如：鸡胸肉、米饭" style="flex:1">
+        <input type="number" class="num" id="foodGram" placeholder="克数 g" min="1" max="3000">
+        <button type="submit" class="add-btn">精确记录</button>
+      </form>
+      <div class="field-error" id="foodErrPro" style="display:none">请填写食物名称和克数（1-3000g）</div>
+
+      <form class="add-form" id="foodFormNormal" style="margin-top:14px;display:none">
+        <input type="text" id="foodNameNormal" placeholder="吃了什么，如：米饭、苹果、鸡胸肉" style="flex:1">
+        <input type="number" class="num" id="foodPortion" placeholder="份数" min="0.5" max="20" step="0.5">
+        <button type="submit" class="add-btn">记录</button>
+      </form>
+      <div class="field-error" id="foodErrNormal" style="display:none">请填写食物名称和份数（0.5-20 份）</div>
+      <p class="food-tip" id="foodTip">以一碗约100g为例</p>
+
+      <div class="list" id="foodList" style="margin-top:10px"></div>
+    </section>
+
+    <!-- 睡眠记录 -->
+    <section class="card" id="sleepCard">
+      <div class="card-head">
+        <div class="card-title"><span class="dot sleep"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></span>睡眠记录</div>
+        <span class="mode-tag" id="sleepTag">未记录</span>
+      </div>
+      <div class="sleep-grid">
+        <label class="sleep-field">入睡时间
+          <input type="time" id="sleepBed" value="23:00" step="60">
+        </label>
+        <label class="sleep-field">起床时间
+          <input type="time" id="sleepWake" value="07:00" step="60">
+        </label>
+        <label class="sleep-field full">半夜清醒时长
+          <span class="sleep-input-row">
+            <input type="number" id="sleepAwake" value="0" min="0" max="600" step="1" inputmode="numeric" placeholder="0">
+            <span>分钟</span>
+          </span>
+        </label>
+      </div>
+      <div class="sleep-result">
+        <div class="sr"><b id="sleepDur">7 小时 0 分</b><small>实际睡眠时长</small></div>
+        <div class="sr"><b id="sleepCycles">约 5 个</b><small>睡眠周期估算</small></div>
+        <div class="sr"><b id="sleepScore">良好</b><small>睡眠评价</small></div>
+      </div>
+      <div class="sleep-eval" id="sleepEval"></div>
+      <div class="sleep-actions"><button type="button" class="add-btn" id="sleepSave">记录睡眠</button></div>
+      <div class="sleep-link" id="sleepLink"></div>
+    </section>
+
+    <!-- 近 7 天 + 历史记录 -->
+    <section class="card">
+      <div class="card-head">
+        <div class="card-title"><span class="dot history"><svg viewBox="0 0 24 24" style="stroke:var(--on-c)"><path d="M12 8v4l3 2M21 12a9 9 0 1 1-3-6.7M21 3v5h-5"/></svg></span>近 7 天记录</div>
+        <div class="head-actions">
+          <button class="hist-btn chart-btn" id="chartBtn" title="运动时长 / 体重趋势 / 数据导出">
+            <svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>运动数据可视化图表
+          </button>
+          <button class="hist-btn" id="histBtn">历史记录</button>
+        </div>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </section>
+  </div>
+
+  <p class="footer-note">数据保存在本机浏览器中，刷新页面不会丢失<br>建议每天固定时间打卡，坚持就是胜利</p>
+</div>
+</div>
+<!-- 删除确认 -->
+<div class="modal-mask" id="modalMask">
+  <div class="modal">
+    <h3>确认删除？</h3>
+    <p id="modalText">删除后无法恢复。</p>
+    <div class="modal-btns">
+      <button class="modal-cancel" id="modalCancel">取消</button>
+      <button class="modal-confirm" id="modalConfirm">删除</button>
+    </div>
+  </div>
+</div>
+
+<!-- 通用数字输入弹窗 -->
+<div class="modal-mask" id="inputMask">
+  <div class="modal">
+    <h3 id="inputTitle">请输入</h3>
+    <input type="number" class="modal-input" id="inputField" min="1">
+    <div class="modal-hint" id="inputHint"></div>
+    <div class="modal-btns">
+      <button class="modal-cancel" id="inputCancel">取消</button>
+      <button class="modal-confirm" id="inputOk" style="background:var(--c)">确定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 个人档案 / 身体数据台账 -->
+<div class="modal-mask" id="profileMask">
+  <div class="modal wide">
+    <h3>个人档案</h3>
+    <div class="modal-hint">点击「计算 BMI」评估体重状况，数据仅保存在本机</div>
+    <div class="profile-grid">
+      <label class="profile-field">身高（cm）<input type="number" id="pfHeight" placeholder="如 165" min="120" max="220"></label>
+      <label class="profile-field">体重（kg）<input type="number" id="pfWeight" placeholder="如 60" min="30" max="200" step="0.1"></label>
+      <label class="profile-field">年龄（岁）<input type="number" id="pfAge" placeholder="如 20" min="10" max="100"></label>
+      <label class="profile-field">性别<select id="pfGender"><option value="female">女生</option><option value="male">男生</option></select></label>
+    </div>
+    <div class="bmi-box" id="bmiBox">
+      <div class="bmi-main"><span>BMI</span><b id="bmiValue">0</b><span class="bmi-tag ok" id="bmiTag">健康</span></div>
+      <div class="bmi-advice" id="bmiAdvice"></div>
+    </div>
+    <div class="modal-btns" style="margin-top:12px">
+      <button class="modal-cancel" id="profileClose">关闭</button>
+      <button class="modal-confirm" id="bmiCalcBtn" style="background:var(--c)">计算 BMI</button>
+    </div>
+
+    <div class="profile-sep"></div>
+    <h3 style="font-size:15px">身体数据台账</h3>
+    <div class="modal-hint">记录体重、腰围，每次录入自动生成体重变化趋势曲线</div>
+    <div class="ledger-form">
+      <label class="profile-field">体重（kg）<input type="number" id="lgWeight" min="30" max="200" step="0.1" placeholder="如 60.5"></label>
+      <label class="profile-field">腰围（cm）<input type="number" id="lgWaist" min="40" max="200" step="0.1" placeholder="选填"></label>
+      <button type="button" class="add-btn" id="lgAdd">录入身体数据</button>
+    </div>
+    <div class="trend-box">
+      <div class="trend-head"><span>体重变化趋势</span><b id="trendDelta">—</b></div>
+      <div id="weightTrend"></div>
+    </div>
+    <div class="ledger-list" id="ledgerList"></div>
+  </div>
+</div>
+
+<!-- 运动数据可视化图表 -->
+<div class="modal-mask" id="chartMask">
+  <div class="modal wide">
+    <h3>运动数据可视化</h3>
+    <div class="modal-hint">运动总时长柱状图（当前人群类型）+ 体重变化折线图，可导出打卡记录</div>
+    <div class="chart-tabs" id="chartTabs">
+      <button type="button" data-range="week" class="active">本周</button>
+      <button type="button" data-range="month">本月</button>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title"><span>运动总时长</span><small id="chartBarMeta"></small></div>
+      <div id="barChart"></div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title"><span>体重变化</span><small id="chartLineMeta"></small></div>
+      <div id="lineChart"></div>
+    </div>
+    <p class="export-hint">导出为 .txt 文本：手机端会弹出分享面板（可保存到文件或相册类 App），电脑端直接下载。</p>
+    <button type="button" class="export-btn" id="exportBtn">
+      <svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg>导出打卡记录（文本）
+    </button>
+    <div class="modal-btns" style="margin-top:12px">
+      <button class="modal-cancel" id="chartClose" style="flex:1">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 近三个月历史 -->
+<div class="modal-mask" id="monthMask">
+  <div class="modal wide">
+    <h3>历史记录（近三个月）</h3>
+    <div class="modal-hint" id="monthTypeHint">当前人群类型的记录</div>
+    <div class="month-list" id="monthList"></div>
+    <div class="modal-btns" style="margin-top:14px">
+      <button class="modal-cancel" id="monthClose" style="flex:1">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 运动项目选择库 -->
+<div class="modal-mask" id="pickMask">
+  <div class="modal wide">
+    <h3>选择运动项目</h3>
+    <div class="modal-hint">点击热门项目即可填入；也可在下方自定义，共 20 项常见运动</div>
+    <div class="pick-grid" id="pickGrid"></div>
+    <div class="add-form" style="margin-top:16px">
+      <input type="text" id="pickCustom" placeholder="自定义运动项目，如：攀岩、橄榄球" maxlength="20">
+      <button type="button" class="add-btn" id="pickCustomBtn">使用自定义</button>
+    </div>
+    <div class="field-error" id="pickErr">该运动不可添加</div>
+    <div class="modal-btns" style="margin-top:14px">
+      <button class="modal-cancel" id="pickClose" style="flex:1">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 忘记密码 / 重置密码 -->
+<div class="modal-mask" id="forgotMask">
+  <div class="modal">
+    <h3>忘记密码 · 重新设置</h3>
+    <div class="modal-hint">输入注册手机号并完成短信验证，即可设置新密码</div>
+    <input type="tel" class="modal-input" id="fgPhone" placeholder="注册手机号（11 位）" maxlength="11">
+    <div class="code-row" style="margin-bottom:10px">
+      <input type="text" id="fgCode" placeholder="6 位验证码" maxlength="6">
+      <button type="button" class="code-btn" id="fgSendBtn">获取验证码</button>
+    </div>
+    <input type="password" class="modal-input" id="fgNewPwd" placeholder="新密码（6-20 位）" maxlength="20">
+    <div class="modal-btns">
+      <button class="modal-cancel" id="fgCancel">取消</button>
+      <button class="modal-confirm" id="fgOk" style="background:var(--c)">重置密码</button>
+    </div>
+  </div>
+</div>
+
+<!-- 奖励大拇指 -->
+<div class="reward-pop" id="rewardPop">
+  <div class="reward-card">
+    <svg viewBox="0 0 24 24" fill="none" stroke="var(--c)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 11v9H4a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1h3zm0 0l4-7c1.3-2.3 4.5-1.4 4.5 1.4V10h4.5a2 2 0 0 1 2 2.3l-1 6A2 2 0 0 1 15 20H7"/>
+    </svg>
+    <h3>每动一步，皆有收获！</h3>
+  </div>
+</div>
+
+<!-- 睡眠充足表扬动画 -->
+<div class="sleep-pop" id="sleepPop">
+  <div class="sleep-praise">
+    <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="var(--c)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+      <path d="M17.2 5.4l.6 1.5 1.6.2-1.2 1.1.4 1.6-1.4-.8-1.4.8.4-1.6-1.2-1.1 1.6-.2z" fill="var(--c)" stroke="none"/>
+    </svg>
+    <h3>睡眠充足，精力满分！</h3>
+    <p>保持规律作息，今天的训练会更安全高效</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="celebrate" id="celebrate"></div>
+<script>
+/* ================= 移动端兼容：旧版 iOS polyfill ================= */
+(function(){
+  if(!String.prototype.padStart){
+    String.prototype.padStart=function(targetLength,padString){
+      var str=String(this);
+      targetLength=targetLength>>0;
+      padString=padString===undefined?' ':String(padString);
+      if(str.length>=targetLength||padString==='') return str;
+      var pad='';
+      while(pad.length<targetLength-str.length) pad+=padString;
+      return pad.slice(0,targetLength-str.length)+str;
+    };
+  }
+  if(typeof NodeList!=='undefined'&&!NodeList.prototype.forEach){
+    NodeList.prototype.forEach=Array.prototype.forEach;
+  }
+  if(!Array.prototype.find){
+    Array.prototype.find=function(pred,thisArg){
+      for(var i=0;i<this.length;i++){ if(pred.call(thisArg,this[i],i,this)) return this[i]; }
+      return undefined;
+    };
+  }
+  if(typeof Element!=='undefined'&&!Element.prototype.closest){
+    Element.prototype.closest=function(sel){
+      var el=this;
+      var matches=el.matches||el.msMatchesSelector||el.webkitMatchesSelector;
+      while(el&&el.nodeType===1){
+        if(matches.call(el,sel)) return el;
+        el=el.parentElement||el.parentNode;
+      }
+      return null;
+    };
+  }
+})();
+
+/* ================= 全局存储 ================= */
+var STORE_KEY = 'fitness_tracker_v5';
+var WATER_GOAL = 2000, FOOD_GOAL = 1800;
+var STORAGE_OK = true, MEM_STORE = {};
+try{
+  window.localStorage.setItem('__fitness_storage_test__','1');
+  window.localStorage.removeItem('__fitness_storage_test__');
+}catch(e){ STORAGE_OK = false; }
+function readStoreRaw(){
+  try{ return window.localStorage.getItem(STORE_KEY); }
+  catch(e){ return MEM_STORE[STORE_KEY] || null; }
+}
+function writeStoreRaw(v){
+  try{ window.localStorage.setItem(STORE_KEY,v); }
+  catch(e){ MEM_STORE[STORE_KEY]=v; }
+}
+
+function loadStore(){
+  try{ var s = JSON.parse(readStoreRaw()); }catch(e){ s=null; }
+  if(!s) s = { users:{}, current:null, skin:'green', dark:false };
+  if(!s.users) s.users = {};
+  if(!s.skin) s.skin = 'green';
+  s.dark = !!s.dark;
+  return s;
+}
+var STORE = loadStore();
+function persistStore(){ writeStoreRaw(JSON.stringify(STORE)); }
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function todayKey(d){
+  d = d || new Date();
+  var m=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0');
+  return d.getFullYear()+'-'+m+'-'+dd;
+}
+var toastTimer;
+function toast(msg,type,duration){
+  var t=$('toast');
+  if(!t){ alert(msg); return; }
+  t.textContent=msg; t.className='toast show '+(type||'');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){ t.className='toast'; }, duration||2400);
+}
+
+/* ================= 皮肤 / 夜间（全局，含登录页） ================= */
+function applySkin(name){
+  document.documentElement.setAttribute('data-skin',name);
+  document.querySelectorAll('#skinPanel button').forEach(function(b){
+    b.classList.toggle('active', b.dataset.skin===name);
+  });
+}
+function applyDark(d){
+  document.documentElement.setAttribute('data-dark', d?'true':'false');
+  $('iconMoon').innerHTML = d
+    ? '<circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"/>'
+    : '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+}
+applySkin(STORE.skin); applyDark(STORE.dark);
+$('skinBtn').addEventListener('click', function(e){
+  e.stopPropagation();
+  $('skinPanel').classList.toggle('show');
+});
+document.addEventListener('click', function(e){
+  if(!e.target.closest('#skinBtn')) $('skinPanel').classList.remove('show');
+});
+$('skinPanel').addEventListener('click', function(e){
+  var b = e.target.closest('button[data-skin]');
+  if(b){ STORE.skin=b.dataset.skin; persistStore(); applySkin(b.dataset.skin); $('skinPanel').classList.remove('show');
+    toast('已切换为「'+b.textContent+'」风格'); }
+});
+$('themeBtn').addEventListener('click', function(){
+  STORE.dark = !STORE.dark; persistStore(); applyDark(STORE.dark);
+});
+
+/* ================= 登录视图切换 ================= */
+var authMode='pwd';
+function showAuthMode(mode){
+  authMode=mode;
+  $('pwdForm').style.display=mode==='pwd'?'block':'none';
+  $('smsForm').style.display=mode==='sms'?'block':'none';
+  $('regForm').style.display=mode==='reg'?'block':'none';
+  document.querySelectorAll('#authTabs button').forEach(function(b){
+    b.classList.toggle('active', b.dataset.tab===mode);
+  });
+  $('authTabs').style.display=mode==='reg'?'none':'flex';
+  $('goReg').style.display=mode==='reg'?'none':'inline';
+  $('goLogin').style.display=mode==='reg'?'inline':'none';
+  $('switchText').textContent=mode==='reg'?'已有账号？':'还没有账号？';
+}
+document.querySelectorAll('#authTabs button').forEach(function(b){
+  b.addEventListener('click', function(){ showAuthMode(b.dataset.tab); });
+});
+$('goReg').addEventListener('click', function(){ showAuthMode('reg'); });
+$('goLogin').addEventListener('click', function(){ showAuthMode('pwd'); });
+
+function validPhone(p){ return /^1[3-9]\d{9}$/.test(p); }
+
+/* ================= 验证码（演示：屏幕显示） ================= */
+var codes={};
+function makeCode(phone,btn){
+  if(!validPhone(phone)){ toast('请输入正确的 11 位手机号','error'); return; }
+  var code=String(Math.floor(100000+Math.random()*900000));
+  codes[phone]={code:code,expires:Date.now()+5*60*1000};
+  toast('演示验证码：'+code+'（5 分钟内有效）','success',7000);
+  var n=60, orig=btn.textContent;
+  btn.disabled=true; btn.textContent=n+'s 后重发';
+  var timer=setInterval(function(){
+    n--;
+    if(n<=0){ clearInterval(timer); btn.disabled=false; btn.textContent=orig; }
+    else btn.textContent=n+'s 后重发';
+  },1000);
+}
+$('sendCodeBtn').addEventListener('click', function(){ makeCode($('smsPhone').value.trim(),this); });
+$('regSendBtn').addEventListener('click', function(){ makeCode($('regPhone').value.trim(),this); });
+$('fgSendBtn').addEventListener('click', function(){
+  var p=$('fgPhone').value.trim();
+  if(!validPhone(p)){ toast('请输入正确的手机号','error'); return; }
+  if(!STORE.users[p]){ toast('该手机号尚未注册，请先注册','error'); return; }
+  makeCode(p,this);
+});
+
+/* ================= 忘记密码：打开 / 重置 ================= */
+$('openForgot').addEventListener('click', function(){
+  $('fgPhone').value=$('pwdAccount').value||'';
+  $('fgCode').value=''; $('fgNewPwd').value='';
+  $('forgotMask').classList.add('show');
+});
+function closeForgot(){ $('forgotMask').classList.remove('show'); }
+$('fgCancel').addEventListener('click', closeForgot);
+$('forgotMask').addEventListener('click', function(e){ if(e.target===this) closeForgot(); });
+$('fgOk').addEventListener('click', function(){
+  var phone=$('fgPhone').value.trim(), code=$('fgCode').value.trim(), pwd=$('fgNewPwd').value;
+  if(!validPhone(phone)){ toast('请输入正确的手机号','error'); return; }
+  if(!STORE.users[phone]){ toast('该手机号尚未注册，请先注册','error'); return; }
+  if(!code){ toast('请输入短信验证码','error'); return; }
+  var err=verifyCode(phone,code);
+  if(err){ toast(err,'error'); return; }
+  if(!pwd||pwd.length<6){ toast('新密码至少需要 6 位','error'); return; }
+  STORE.users[phone].password=pwd;
+  persistStore();
+  closeForgot();
+  showAuthMode('pwd');
+  $('pwdAccount').value=phone;
+  $('pwdPassword').value='';
+  toast('密码已重置，请使用新密码登录','success');
+});
+function verifyCode(phone,code){
+  var c=codes[phone];
+  if(!c||c.expires<Date.now()) return '验证码已过期，请重新获取';
+  if(c.code!==code) return '验证码不正确';
+  return '';
+}
+
+/* ================= 默认数据 ================= */
+function defaultData(){
+  return { days:{}, personType:'normal',
+    profile:{ weight:60, height:165, age:20, gender:'female' },
+    ledger:[] };
+}
+
+/* ================= 账号密码登录 ================= */
+$('pwdForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var phone=$('pwdAccount').value.trim(), pwd=$('pwdPassword').value;
+  if(!validPhone(phone)){ toast('请输入正确的手机号','error'); return; }
+  var u=STORE.users[phone];
+  if(!u){ toast('该账号未注册，请先注册','error'); return; }
+  if(!u.password){ toast('未设置密码，请使用短信登录','error'); return; }
+  if(u.password!==pwd){ toast('密码不正确','error'); return; }
+  enterApp(phone);
+});
+
+/* ================= 短信登录 ================= */
+$('smsForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var phone=$('smsPhone').value.trim(), code=$('smsCode').value.trim();
+  if(!validPhone(phone)){ toast('请输入正确的手机号','error'); return; }
+  var err=verifyCode(phone,code);
+  if(err){ toast(err,'error'); return; }
+  if(!STORE.users[phone]){
+    STORE.users[phone]={phone:phone,password:'',data:defaultData()};
+    persistStore();
+  }
+  enterApp(phone);
+});
+
+/* ================= 注册（已注册则引导登录，不覆盖） ================= */
+$('regForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  var phone=$('regPhone').value.trim(), code=$('regCode').value.trim(), pwd=$('regPassword').value;
+  if(!validPhone(phone)){ toast('请输入正确的手机号','error'); return; }
+  if(!code){ toast('请输入短信验证码','error'); return; }
+  var err=verifyCode(phone,code);
+  if(err){ toast(err,'error'); return; }
+  if(STORE.users[phone]){
+    toast('该手机号已注册，请直接登录','error');
+    showAuthMode('pwd');
+    $('pwdAccount').value=phone;
+    return;
+  }
+  if(!pwd){ toast('请设置密码（至少 6 位）','error'); return; }
+  if(pwd.length<6){ toast('密码至少需要 6 位','error'); return; }
+  STORE.users[phone]={phone:phone,password:pwd,data:defaultData()};
+  persistStore();
+  enterApp(phone);
+});
+
+/* ================= 进入主应用 ================= */
+var DB=null,cur=null,today=null;
+function enterApp(phone){
+  if(!STORE.users[phone].data) STORE.users[phone].data=defaultData();
+  DB=STORE.users[phone].data;
+  if(!DB.profile) DB.profile={weight:60,height:165,age:20,gender:'female'};
+  if(!DB.ledger) DB.ledger=[];
+  if(DB.personType!=='pro'&&DB.personType!=='normal') DB.personType='normal';
+  today=todayKey();
+  cur=getSub(today,DB.personType||'normal');
+  STORE.current=phone; persistStore();
+  $('authView').style.display='none';
+  $('appView').classList.add('show');
+  $('userPhoneLabel').textContent=phone.slice(0,3)+'****'+phone.slice(7);
+  initApp();
+  if(!STORAGE_OK){
+    setTimeout(function(){
+      toast('当前浏览器不允许本地存储，记录只在本次打开有效；建议通过网址访问','error',6500);
+    },900);
+  }
+}
+$('logoutBtn').addEventListener('click', function(){
+  STORE.current=null; persistStore();
+  $('appView').classList.remove('show');
+  $('authView').style.display='flex';
+  showAuthMode('pwd');
+  toast('已退出登录');
+});
+/* 自动登录（脚本2 末尾会再次处理，这里仅兜底） */
+</script>
+<script>
+/* ================= 按人群类型分离的数据 ================= */
+function blankSub(){ return { water:0, sports:[], foods:[], checkedIn:false, sleep:null }; }
+function getSub(key,type){
+  if(!DB.days[key]) DB.days[key] = {};
+  if(!DB.days[key][type]) DB.days[key][type] = blankSub();
+  var sub=DB.days[key][type];
+  if(sub.sleep===undefined) sub.sleep=null;
+  return sub;
+}
+
+/* ================= 运动 MET 库 ================= */
+var SPORT_MET=[
+  ['hiit',10],['高强度间歇',10],['跳绳',10],['快跑',11],['冲刺',11],
+  ['爬楼梯',8],['爬楼',8],['跑步',8],['慢跑',8],['游泳',8],
+  ['拳击',9],['泰拳',9],['搏击',9],['格斗',9],
+  ['骑车',7],['骑行',7],['单车',7],['自行车',7],['划船机',7],['划船',7],
+  ['网球',7],['足球',7],['篮球',6.5],['羽毛球',5.5],['排球',5],
+  ['椭圆机',5],['爬山',6],['登山',6],['滑雪',7],['轮滑',6],
+  ['跳舞',5],['舞蹈',5],['有氧操',7],['健身操',7],['健美操',6],
+  ['力量',6],['举铁',6],['哑铃',6],['杠铃',6],['器械',6],['俯卧撑',6],
+  ['深蹲',5],['平板支撑',4],['卷腹',4],['仰卧起坐',4],['腹肌',4],
+  ['乒乓球',4],['瑜伽',3],['拉伸',2.5],['散步',3.5],['快走',4.5],
+  ['走路',3.5],['步行',3.5]
+];
+var DEFAULT_MET=5;
+
+/* 20 个热门运动（供选择） */
+var POPULAR_SPORTS=['跑步','游泳','羽毛球','篮球','网球','足球','马拉松','自行车',
+  '瑜伽','普拉提','体操','步行','跳绳','快走','爬山','力量训练','跳舞','椭圆机','乒乓球','骑行'];
+
+/* 非运动 / 猎奇项目黑名单 */
+var BANNED_SPORTS=['睡觉','睡眠','挖掘机','打游戏','玩游戏','游戏','吃饭','上班','工作',
+  '学习','发呆','躺平','躺着','刷手机','玩手机','看电视','睡觉了','打盹','休息'];
+function isSportAllowed(name){
+  for(var i=0;i<BANNED_SPORTS.length;i++){
+    if(name.indexOf(BANNED_SPORTS[i])!==-1) return false;
+  }
+  return true;
+}
+
+function sportKcal(name,minutes){
+  var met=DEFAULT_MET;
+  for(var i=0;i<SPORT_MET.length;i++){
+    if(name.indexOf(SPORT_MET[i][0])!==-1){ met=SPORT_MET[i][1]; break; }
+  }
+  var gross=Math.round(met*DB.profile.weight*minutes/60);
+  var net=Math.max(0,Math.round((met-1)*DB.profile.weight*minutes/60));
+  return {met:met,gross:gross,net:net};
+}
+
+/* ================= 食物热量库（kcal / 100g） ================= */
+// 每条：[名称, kcal/100g, 蛋白质 g/100g]
+var FOOD_KCAL=[
+  ['蛋炒饭',190,5],['牛肉饭',150,8],['牛肉面',120,5],['炒饭',170,4],
+  ['方便面',470,9],['螺蛳粉',100,3],['面条',110,4.5],['拉面',110,5],
+  ['糙米饭',112,2.6],['米饭',116,2.6],['粥',46,1.1],['燕麦',370,13],
+  ['全麦面包',250,9],['面包',310,8],['包子',220,8],['馒头',223,7],['花卷',214,7],
+  ['饺子',250,9],['水饺',250,9],['馄饨',180,6],['煎饼',180,6],
+  ['茶叶蛋',150,13],['煎蛋',190,13],['蛋羹',100,5],['鸡蛋',144,13],
+  ['燕麦牛奶',90,4],['拿铁',48,3],['美式',3,0.1],['咖啡',60,0.1],
+  ['豆浆',30,3],['牛奶',54,3.2],['酸奶',72,2.5],
+  ['炸鸡',260,14],['鸡翅',194,17],['鸡腿',181,16],['鸡胸肉',118,23],
+  ['汉堡',250,13],['薯条',290,3],['牛排',200,20],['红烧肉',250,10],
+  ['牛肉',125,20],['猪肉',143,14],['三文鱼',208,20],['虾',93,20],['鱼',110,17],['豆腐',81,8],
+  ['沙拉',80,3],['轻食',110,5],['西兰花',35,2.8],['青菜',20,2],['蔬菜',30,2],
+  ['黄瓜',16,0.7],['西红柿',20,0.9],['玉米',112,4],['红薯',90,1.1],['土豆',77,2],
+  ['苹果',52,0.3],['香蕉',89,1.1],['橙子',47,0.9],['西瓜',30,0.6],['葡萄',44,0.6],
+  ['草莓',32,0.7],['蓝莓',57,0.7],['火龙果',55,1.1],
+  ['奶茶',250,2],['可乐',42,0],['雪碧',40,0],['橙汁',45,0.7],['果汁',45,0.3],
+  ['薯片',530,7],['饼干',430,7],['巧克力',546,6],['蛋糕',320,5],['冰淇淋',207,3],
+  ['披萨',250,11],['火锅',150,8],['烧烤',180,12],['麻辣烫',130,6],['关东煮',120,6]
+];
+var DEFAULT_FOOD=120, DEFAULT_PROTEIN=5;
+function matchFood(raw){
+  var hit=null,hitLen=0;
+  for(var i=0;i<FOOD_KCAL.length;i++){
+    var kw=FOOD_KCAL[i][0];
+    if(raw.indexOf(kw)!==-1&&kw.length>hitLen){ hit=FOOD_KCAL[i]; hitLen=kw.length; }
+  }
+  if(hit) return {kcal:hit[1],protein:hit[2],matched:true};
+  return {kcal:DEFAULT_FOOD,protein:DEFAULT_PROTEIN,matched:false};
+}
+
+/* ================= 基础代谢 ================= */
+function calcBMR(){
+  var p=DB.profile;
+  var base=10*p.weight+6.25*p.height-5*p.age;
+  return Math.round(base+(p.gender==='male'?5:-161));
+}
+
+/* ================= 状态（当前类型） ================= */
+function dayStatus(s){
+  var waterOk=s.water>=WATER_GOAL;
+  var sportOk=s.sports.length>0&&s.sports.every(function(x){return x.done;});
+  var k=s.foods.reduce(function(a,f){return a+f.kcal;},0);
+  var pr=Math.round(s.foods.reduce(function(a,f){return a+(f.protein||0);},0)*10)/10;
+  var foodOk=s.foods.length>0&&k<=FOOD_GOAL;
+  var net=s.sports.filter(function(x){return x.done;}).reduce(function(a,x){return a+(x.net||0);},0);
+  return {waterOk:waterOk,sportOk:sportOk,foodOk:foodOk,foodKcal:k,foodProtein:pr,
+    pct:Math.round(((waterOk?1/3:0)+(sportOk?1/3:0)+(foodOk?1/3:0))*100),netSport:net};
+}
+function calcStreak(){
+  var n=0,d=new Date();
+  var day=DB.days[todayKey(d)];
+  if(!(day&&day[DB.personType]&&day[DB.personType].checkedIn)) d.setDate(d.getDate()-1);
+  while(DB.days[todayKey(d)]&&DB.days[todayKey(d)][DB.personType]&&DB.days[todayKey(d)][DB.personType].checkedIn){
+    n++; d.setDate(d.getDate()-1);
+  }
+  return n;
+}
+
+/* ================= 渲染：总览 ================= */
+function renderOverview(){
+  var st=dayStatus(cur);
+  $('ringPct').textContent=st.pct+'%';
+  var circ=2*Math.PI*45;
+  $('ringFg').style.strokeDashoffset=circ*(1-st.pct/100);
+  $('streakNum').textContent=calcStreak();
+  var done=st.waterOk+st.sportOk+st.foodOk;
+  if(cur.checkedIn){
+    $('overviewTitle').textContent='今日已打卡，太棒了';
+    $('overviewTip').textContent='三个目标全部拿下，好好休息';
+    var b1=$('checkinBtn'); b1.textContent='今日已完成'; b1.disabled=true; b1.className='checkin-btn done';
+  }else if(st.pct===100){
+    $('overviewTitle').textContent='目标已全部达成';
+    $('overviewTip').textContent='点击下方按钮完成今日打卡';
+    var b2=$('checkinBtn'); b2.textContent='完成今日打卡'; b2.disabled=false; b2.className='checkin-btn';
+  }else{
+    $('overviewTitle').textContent='今天也要加油';
+    var miss=[];
+    if(!st.waterOk)miss.push('饮水');
+    if(!st.sportOk)miss.push('运动');
+    if(!st.foodOk)miss.push('饮食');
+    $('overviewTip').textContent='还差：'+miss.join('、')+'（已完成 '+done+'/3）';
+    var b3=$('checkinBtn'); b3.textContent='完成今日打卡'; b3.disabled=false; b3.className='checkin-btn';
+  }
+  renderTotalBurn();
+}
+function renderTotalBurn(){
+  var st=dayStatus(cur),bmr=calcBMR();
+  $('bmrKcal').textContent=bmr;
+  $('netSportKcal').textContent=st.netSport;
+  $('totalBurnKcal').textContent=bmr+st.netSport;
+  $('totalBurn').classList.toggle('show',st.pct===100||cur.checkedIn);
+}
+
+/* ================= 渲染：饮水 ================= */
+function renderWater(){
+  $('waterBar').style.width=Math.min(100,Math.round(cur.water/WATER_GOAL*100))+'%';
+  $('waterMl').textContent=cur.water;
+}
+
+/* ================= 渲染：运动 ================= */
+function renderSports(){
+  var dk=0,dn=0;
+  cur.sports.forEach(function(s){if(s.done){dk+=s.gross;dn++;}});
+  $('sportSummary').innerHTML=cur.sports.length
+    ?'已完成 <b>'+dn+'/'+cur.sports.length+'</b> 项 · 运动消耗 <b>'+dk+' kcal</b>'
+    :'完成运动后可累计消耗热量';
+  var list=$('sportList');
+  if(cur.sports.length===0){
+    list.innerHTML='<div class="empty"><svg viewBox="0 0 24 24"><path d="M2.5 9v6M5 7v10M19 7v10M21.5 9v6M5 12h14"/></svg><p>还没有运动计划</p><small>添加今天的第一项运动吧</small></div>';
+    return;
+  }
+  list.innerHTML=cur.sports.map(function(s){
+    var sub=s.done?'已完成 · 消耗 '+s.gross+' kcal':s.minutes+' 分钟 · 预计消耗 '+s.gross+' kcal';
+    return '<div class="item'+(s.done?' done':'')+'">'
+      +'<button class="check" data-toggle="'+s.id+'"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button>'
+      +'<div class="item-body"><div class="item-name">'+esc(s.name)+'</div><div class="item-sub">'+sub+'</div></div>'
+      +'<button class="del-btn" data-del="sport:'+s.id+'"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>';
+  }).join('');
+}
+
+/* ================= 渲染：饮食（无奖励） ================= */
+function renderFoods(){
+  var st=dayStatus(cur),over=st.foodKcal>FOOD_GOAL;
+  $('foodKcal').textContent=st.foodKcal;
+  $('foodProtein').textContent=st.foodProtein;
+  $('foodBar').style.width=Math.min(100,Math.round(st.foodKcal/FOOD_GOAL*100))+'%';
+  $('foodProgress').className='progress food'+(over?' goal-over':'');
+  $('foodKcal').style.color=over?'var(--red)':'';
+  var list=$('foodList');
+  if(cur.foods.length===0){
+    list.innerHTML='<div class="empty"><svg viewBox="0 0 24 24"><path d="M5 3v8a3 3 0 0 0 6 0V3M8 3v18M16 3c2 2 3 5 3 9s-1 6-3 6"/></svg><p>今天还没有饮食记录</p><small>记录每一餐，控制热量摄入</small></div>';
+    return;
+  }
+  list.innerHTML=cur.foods.map(function(f){
+    var detail=f.grams?f.grams+' g':f.portions+' 份（约'+Math.round(f.portions*100)+'g）';
+    var sub=detail+' · 蛋白质 '+f.protein+' g · '+(f.matched?'系统估算':'未识别，按 120 kcal/100g 估算');
+    return '<div class="item food-item'+(over?' goal-over':'')+'">'
+      +'<div class="item-body"><div class="item-name">'+esc(f.name)+'</div><div class="item-sub">'+sub+'</div></div>'
+      +'<span class="kcal">'+f.kcal+' kcal</span>'
+      +'<button class="del-btn" data-del="food:'+f.id+'"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>';
+  }).join('');
+}
+
+/* ================= 渲染：近7天（当前类型） ================= */
+function renderHistory(){
+  var rows=[],week=['日','一','二','三','四','五','六'];
+  for(var i=6;i>=0;i--){
+    var d=new Date();d.setDate(d.getDate()-i);
+    var key=todayKey(d);
+    var sub=DB.days[key]&&DB.days[key][DB.personType]?DB.days[key][DB.personType]:blankSub();
+    var label=i===0?'今天':(i===1?'昨天':(d.getMonth()+1)+'/'+d.getDate());
+    var sk=sub.foods.reduce(function(a,f){return a+f.kcal;},0);
+    var dn=sub.sports.filter(function(s){return s.done;}).length;
+    var zz=sub.sleep?sub.sleep.dur:0;
+    rows.push('<div class="hist-row">'
+      +'<div class="hist-date">'+label+'<small>周'+week[d.getDay()]+'</small></div>'
+      +'<div class="hist-bars">'
+      +'<div class="hbar w"><span>水</span><em><i style="width:'+Math.min(100,sub.water/WATER_GOAL*100)+'%"></i></em><b>'+sub.water+'ml</b></div>'
+      +'<div class="hbar s"><span>动</span><em><i style="width:'+(sub.sports.length?dn/sub.sports.length*100:0)+'%"></i></em><b>'+dn+'/'+sub.sports.length+'</b></div>'
+      +'<div class="hbar f"><span>食</span><em><i style="width:'+Math.min(100,sk/FOOD_GOAL*100)+'%"></i></em><b>'+sk+'kcal</b></div>'
+      +'<div class="hbar z"><span>睡</span><em><i style="width:'+(zz?Math.min(100,zz/480*100):0)+'%"></i></em><b>'+(zz?fmtHours(zz):'—')+'</b></div></div>'
+      +'<div class="hist-check">'+(sub.checkedIn
+        ?'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--c)" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>'
+        :'<span style="color:var(--t3)">—</span>')+'</div></div>');
+  }
+  $('historyList').innerHTML=rows.join('');
+}
+function renderAll(){renderOverview();renderWater();renderSports();renderFoods();renderSleep();renderHistory();}
+
+/* ================= 类型切换（数据分离） ================= */
+function applyType(t){
+  DB.personType=t;
+  document.querySelectorAll('.type-card').forEach(function(c){
+    c.classList.toggle('selected',c.dataset.type===t);
+  });
+  $('foodFormPro').style.display=t==='pro'?'flex':'none';
+  $('foodErrPro').style.display='none';
+  $('foodFormNormal').style.display=t==='normal'?'flex':'none';
+  $('foodErrNormal').style.display='none';
+  $('foodTip').style.display=t==='normal'?'block':'none';
+  $('modeTag').textContent=t==='pro'?'专业模式 · 精确克数':'普通模式 · 按份估算';
+  $('modeTag').className='mode-tag '+t;
+  // 切换到该类型的独立数据
+  cur=getSub(today,t);
+  loadSleepForm();
+  renderAll();
+}
+$('typePicker').addEventListener('click', function(e){
+  var c=e.target.closest('.type-card');
+  if(c) applyType(c.dataset.type);
+});
+
+/* ================= 饮水操作（达标有奖励） ================= */
+function addWater(add){
+  var before=dayStatus(cur);
+  if(cur.water+add>WATER_GOAL*2){toast('饮水记录已远超目标，请勿重复点击','error');return;}
+  cur.water+=add;
+  persistStore();renderWater();renderOverview();
+  toast('已记录 '+add+' ml');
+  checkGoal(before);
+}
+document.querySelectorAll('.water-btn[data-add]').forEach(function(b){
+  b.addEventListener('click',function(){addWater(+b.dataset.add);});
+});
+$('waterCustom').addEventListener('click',function(){
+  openInput({title:'记录饮水量',hint:'请输入本次喝了多少毫升（1-2000）',val:'',min:1,max:2000,
+    cb:function(v){addWater(v);}});
+});
+$('waterUndo').addEventListener('click',function(){
+  if(cur.water<=0){toast('今天还没有饮水记录','error');return;}
+  var before=dayStatus(cur),back=Math.min(250,cur.water);
+  cur.water=Math.max(0,cur.water-back);
+  persistStore();renderWater();renderOverview();
+  toast('已撤销 '+back+' ml');
+  checkGoal(before);
+});
+
+/* ================= 运动表单 ================= */
+$('sportForm').addEventListener('submit',function(e){
+  e.preventDefault();
+  var name=$('sportName').value.trim(),min=parseInt($('sportMin').value,10);
+  if(!name||!min||min<1||min>600){
+    $('sportErr').classList.add('show');
+    if(!name)$('sportName').focus();else $('sportMin').focus();
+    return;
+  }
+  if(!isSportAllowed(name)){
+    $('sportErr').classList.remove('show');
+    toast('该运动不可添加','error');
+    $('sportName').focus();
+    return;
+  }
+  $('sportErr').classList.remove('show');
+  var k=sportKcal(name,min);
+  cur.sports.push({id:uid(),name:name,minutes:min,met:k.met,gross:k.gross,net:k.net,done:false});
+  $('sportName').value='';$('sportMin').value='';
+  persistStore();renderSports();renderOverview();
+  var sleepWarn=cur.sleep&&cur.sleep.quality!=='良好'&&k.met>=8;
+  if(sleepWarn){
+    toast('已添加，但睡眠偏少，高强度运动容易头晕乏力','error',3200);
+    renderSleep();
+  }else{
+    toast('已添加：预计消耗 '+k.gross+' kcal');
+  }
+});
+
+/* ================= 运动项目选择库 ================= */
+$('sportPickBtn').addEventListener('click', function(){
+  $('pickGrid').innerHTML=POPULAR_SPORTS.map(function(n){
+    return '<button type="button" class="pick-chip" data-name="'+n+'">'+n+'</button>';
+  }).join('');
+  $('pickCustom').value='';
+  $('pickErr').classList.remove('show');
+  $('pickMask').classList.add('show');
+});
+function pickFill(name){
+  $('sportName').value=name;
+  $('pickMask').classList.remove('show');
+  $('sportMin').focus();
+}
+$('pickGrid').addEventListener('click', function(e){
+  var c=e.target.closest('.pick-chip');
+  if(c) pickFill(c.dataset.name);
+});
+$('pickCustomBtn').addEventListener('click', function(){
+  var n=$('pickCustom').value.trim();
+  if(!n){ toast('请先输入自定义运动项目','error'); return; }
+  if(!isSportAllowed(n)){
+    $('pickErr').classList.add('show');
+    toast('该运动不可添加','error');
+    return;
+  }
+  $('pickErr').classList.remove('show');
+  pickFill(n);
+});
+$('pickClose').addEventListener('click', function(){$('pickMask').classList.remove('show');});
+$('pickMask').addEventListener('click', function(e){ if(e.target===this) this.classList.remove('show'); });
+
+/* ================= 饮食：专业（克数，无奖励） ================= */
+$('foodFormPro').addEventListener('submit',function(e){
+  e.preventDefault();
+  var name=$('foodNamePro').value.trim(),g=parseInt($('foodGram').value,10);
+  if(!name||!g||g<1||g>3000){
+    $('foodErrPro').classList.add('show');
+    if(!name)$('foodNamePro').focus();else $('foodGram').focus();
+    return;
+  }
+  $('foodErrPro').classList.remove('show');
+  var m=matchFood(name);
+  var kc=Math.round(m.kcal*g/100), pr=Math.round(m.protein*g/10)/10;
+  cur.foods.push({id:uid(),name:name,grams:g,kcal:kc,protein:pr,matched:m.matched});
+  $('foodNamePro').value='';$('foodGram').value='';
+  persistStore();renderFoods();renderOverview();
+  var st=dayStatus(cur);
+  toast(st.foodKcal>FOOD_GOAL?'已记录，但今日热量已超标':'已记录 '+kc+' kcal · 蛋白质 '+pr+' g',
+        st.foodKcal>FOOD_GOAL?'error':'');
+});
+
+/* ================= 饮食：普通（份数，无奖励） ================= */
+$('foodFormNormal').addEventListener('submit',function(e){
+  e.preventDefault();
+  var name=$('foodNameNormal').value.trim(),p=parseFloat($('foodPortion').value);
+  if(!name||!p||p<0.5||p>20){
+    $('foodErrNormal').classList.add('show');
+    if(!name)$('foodNameNormal').focus();else $('foodPortion').focus();
+    return;
+  }
+  $('foodErrNormal').classList.remove('show');
+  var m=matchFood(name);
+  var kc=Math.round(m.kcal*p), pr=Math.round(m.protein*p*10)/10;
+  cur.foods.push({id:uid(),name:name,portions:p,kcal:kc,protein:pr,matched:m.matched});
+  $('foodNameNormal').value='';$('foodPortion').value='';
+  persistStore();renderFoods();renderOverview();
+  var st=dayStatus(cur);
+  toast(st.foodKcal>FOOD_GOAL?'已记录，但今日热量已超标':(m.matched?'已记录 '+kc+' kcal · 蛋白质 '+pr+' g':'未识别食物按 120 kcal/100g 估算'),
+        st.foodKcal>FOOD_GOAL?'error':'');
+});
+
+/* ================= 列表事件 ================= */
+function bindList(id){
+  $(id).addEventListener('click',function(e){
+    var tg=e.target.closest('[data-toggle]'),dl=e.target.closest('[data-del]');
+    if(tg){
+      var s=cur.sports.find(function(x){return x.id===tg.dataset.toggle;});
+      if(s){
+        var before=dayStatus(cur);
+        s.done=!s.done;
+        persistStore();renderSports();renderOverview();
+        toast(s.done?'完成一项运动':'已取消完成');
+        checkGoal(before);
+      }
+    }
+    if(dl){
+      var parts=dl.dataset.del.split(':');
+      pendingDelete={type:parts[0],id:parts[1]};
+      var item=parts[0]==='sport'
+        ?cur.sports.find(function(x){return x.id===parts[1];})
+        :cur.foods.find(function(x){return x.id===parts[1];});
+      $('modalText').textContent='确定要删除「'+(item?esc(item.name):'')+'」吗？删除后无法恢复。';
+      $('modalMask').classList.add('show');
+    }
+  });
+}
+bindList('sportList');bindList('foodList');
+var pendingDelete=null;
+$('modalCancel').addEventListener('click',function(){$('modalMask').classList.remove('show');pendingDelete=null;});
+$('modalMask').addEventListener('click',function(e){if(e.target===this){this.classList.remove('show');pendingDelete=null;}});
+$('modalConfirm').addEventListener('click',function(){
+  if(!pendingDelete)return;
+  if(pendingDelete.type==='sport')cur.sports=cur.sports.filter(function(x){return x.id!==pendingDelete.id;});
+  else cur.foods=cur.foods.filter(function(x){return x.id!==pendingDelete.id;});
+  pendingDelete=null;
+  $('modalMask').classList.remove('show');
+  persistStore();renderSports();renderFoods();renderOverview();
+  toast('已删除');
+});
+
+/* ================= 打卡 ================= */
+$('checkinBtn').addEventListener('click',function(){
+  if(cur.checkedIn)return;
+  var st=dayStatus(cur);
+  if(st.pct<100){toast('请先完成全部三个目标再打卡','error');return;}
+  cur.checkedIn=true;
+  persistStore();renderAll();
+  toast('打卡成功！全天总消耗约 '+(calcBMR()+st.netSport)+' kcal，连续 '+calcStreak()+' 天','success');
+});
+
+/* ================= 奖励（仅饮水/运动）：彩带+大拇指 ================= */
+function checkGoal(before){
+  var after=dayStatus(cur);
+  if(!before.waterOk&&after.waterOk) reward();
+  if(!before.sportOk&&after.sportOk) reward();
+}
+function reward(){
+  celebrate();
+  var r=$('rewardPop');
+  r.classList.add('show');
+  setTimeout(function(){r.classList.remove('show');},2100);
+}
+function celebrate(){
+  var box=$('celebrate');
+  var colors=['#1f9d6b','#f08a3e','#3a8dde','#f5c451','#e06b67','#8e6fd6','#3cc6c0'];
+  for(var i=0;i<90;i++){
+    var c=document.createElement('div');
+    c.className='confetti'+(i%3===0?' round':'');
+    c.style.left=Math.random()*100+'vw';
+    c.style.background=colors[i%colors.length];
+    c.style.width=(7+Math.random()*7)+'px';
+    c.style.height=(10+Math.random()*12)+'px';
+    c.style.animationDelay=(Math.random()*0.8)+'s';
+    c.style.animationDuration=(1.5+Math.random()*1.5)+'s';
+    box.appendChild(c);
+  }
+  setTimeout(function(){box.innerHTML='';},3800);
+}
+
+/* ================= 通用输入弹窗 ================= */
+var inputCb=null;
+function openInput(o){
+  $('inputTitle').textContent=o.title;
+  $('inputHint').textContent=o.hint;
+  var f=$('inputField');
+  f.value=o.val;f.min=o.min;f.max=o.max;
+  inputCb=o.cb;
+  $('inputMask').classList.add('show');
+  setTimeout(function(){f.focus();f.select();},50);
+}
+function closeInput(){$('inputMask').classList.remove('show');inputCb=null;}
+$('inputCancel').addEventListener('click',closeInput);
+$('inputMask').addEventListener('click',function(e){if(e.target===this)closeInput();});
+$('inputOk').addEventListener('click',function(){
+  var f=$('inputField'),v=parseFloat(f.value);
+  if(!(v>=+f.min&&v<=+f.max)){toast('请输入 '+f.min+'-'+f.max+' 之间的数字','error');f.focus();return;}
+  var cb=inputCb;
+  $('inputMask').classList.remove('show');inputCb=null;
+  if(cb)cb(v);
+});
+$('inputField').addEventListener('keydown',function(e){if(e.key==='Enter'){$('inputOk').click();}});
+
+/* ================= 睡眠记录 ================= */
+var sleepPraiseTimer=null;
+function hm2min(t){
+  if(!t) return null;
+  var p=String(t).split(':');
+  if(p.length<2) return null;
+  var h=parseInt(p[0],10),m=parseInt(p[1],10);
+  if(isNaN(h)||isNaN(m)) return null;
+  return h*60+m;
+}
+function fmtHours(min){ return (Math.round(min/6)/10)+' 小时'; }
+function fmtDur(min){
+  min=Math.max(0,Math.round(min));
+  var h=Math.floor(min/60),m=min%60;
+  return h+' 小时 '+m+' 分';
+}
+function sleepStats(bed,wake,awake){
+  var b=hm2min(bed),w=hm2min(wake);
+  if(b==null||w==null) return null;
+  var span=(w-b+1440)%1440;
+  if(span===0) return null;
+  var dur=span-awake;
+  if(dur<=0) return null;
+  var cycles=Math.max(1,Math.round(dur/90));
+  var quality=dur>=420?'良好':'睡眠不足';
+  return {bed:bed,wake:wake,awake:awake,dur:dur,cycles:cycles,quality:quality};
+}
+function sleepAdvice(st){
+  var extra='';
+  if(st.dur<420){
+    extra='今晚尽量 23:00 前入睡，保证 7 小时以上，睡前 1 小时少看屏幕。';
+    if(st.awake>30) extra+=' 夜间清醒 '+st.awake+' 分钟偏多，睡前避免咖啡因和大量饮水。';
+  }else{
+    extra='约 '+st.cycles+' 个完整睡眠周期（每周期约 90 分钟）。保持固定作息即可。';
+    if(st.awake>30) extra+=' 夜间清醒 '+st.awake+' 分钟，睡前可做些拉伸放松。';
+  }
+  return extra;
+}
+function currentSleepInput(){
+  return {bed:$('sleepBed').value,wake:$('sleepWake').value,
+    awake:Math.max(0,Math.min(600,parseInt($('sleepAwake').value||'0',10)||0))};
+}
+function paintSleepPreview(){
+  var i=currentSleepInput(),st=sleepStats(i.bed,i.wake,i.awake);
+  var durEl=$('sleepDur'),cyEl=$('sleepCycles'),scEl=$('sleepScore'),ev=$('sleepEval');
+  if(!st){
+    durEl.textContent='—';cyEl.textContent='—';scEl.textContent='—';
+    ev.className='sleep-eval show bad';
+    ev.textContent='请填写有效的入睡 / 起床时间（两者不能相同，半夜清醒时长不能超过在床时间）。';
+    return null;
+  }
+  durEl.textContent=fmtDur(st.dur);
+  cyEl.textContent='约 '+st.cycles+' 个';
+  scEl.textContent=st.quality;
+  ev.className='sleep-eval show '+(st.quality==='良好'?'good':'bad');
+  ev.textContent='睡眠周期估算：约 '+st.cycles+' 个完整周期。'+sleepAdvice(st);
+  return st;
+}
+function renderSleep(){
+  var s=cur.sleep,tag=$('sleepTag'),link=$('sleepLink');
+  if(s){
+    tag.textContent=s.quality;
+    tag.className='mode-tag '+(s.quality==='良好'?'normal':'bad');
+    var intense=(cur.sports||[]).filter(function(x){return x.met>=8;});
+    var msg='';
+    if(s.quality!=='良好'){
+      msg='睡眠偏少，高强度运动容易头晕乏力';
+      if(intense.length) msg+='。今天有「'+intense[0].name+'」等高强度训练，建议改为快走、拉伸等低强度，或把训练放到状态好的时候';
+      else msg+='。今天安排训练请先充分热身，出现头晕立即停下';
+      link.className='sleep-link show bad';
+    }else{
+      msg='睡眠充足，精力状态不错，可以放心安排今天的训练；记得运动前热身。';
+      link.className='sleep-link show good';
+    }
+    link.textContent=msg;
+  }else{
+    tag.textContent='未记录';
+    tag.className='mode-tag';
+    link.className='sleep-link';
+    link.textContent='';
+  }
+}
+function loadSleepForm(){
+  var s=cur.sleep;
+  $('sleepBed').value=s&&s.bed?s.bed:'23:00';
+  $('sleepWake').value=s&&s.wake?s.wake:'07:00';
+  $('sleepAwake').value=s&&s.awake?s.awake:0;
+  paintSleepPreview();
+  renderSleep();
+}
+function sleepPraise(){
+  var pop=$('sleepPop');
+  var card=pop.querySelector('.sleep-praise');
+  card.querySelectorAll('.spark').forEach(function(n){n.remove();});
+  for(var i=0;i<12;i++){
+    var sp=document.createElement('span');
+    sp.className='spark';
+    var edge=i%4;
+    if(edge===0){ sp.style.left=(4+Math.random()*92)+'%'; sp.style.top=(-4+Math.random()*13)+'%'; }
+    else if(edge===1){ sp.style.left=(4+Math.random()*92)+'%'; sp.style.top=(91+Math.random()*15)+'%'; }
+    else if(edge===2){ sp.style.left=(-4+Math.random()*12)+'%'; sp.style.top=(8+Math.random()*84)+'%'; }
+    else { sp.style.left=(92+Math.random()*14)+'%'; sp.style.top=(8+Math.random()*84)+'%'; }
+    sp.style.animationDelay=(Math.random()*0.7)+'s';
+    sp.style.background=['#ffd166','#8b7cf6','#7cc4ff','#ff9ecb'][i%4];
+    card.appendChild(sp);
+  }
+  pop.classList.add('show');
+  clearTimeout(sleepPraiseTimer);
+  sleepPraiseTimer=setTimeout(function(){pop.classList.remove('show');},2600);
+}
+['sleepBed','sleepWake','sleepAwake'].forEach(function(id){
+  $(id).addEventListener('input',paintSleepPreview);
+  $(id).addEventListener('change',paintSleepPreview);
+});
+$('sleepSave').addEventListener('click',function(){
+  var i=currentSleepInput(),st=sleepStats(i.bed,i.wake,i.awake);
+  if(!st){ toast('请填写有效的入睡 / 起床时间','error'); return; }
+  cur.sleep={bed:i.bed,wake:i.wake,awake:i.awake,dur:st.dur,cycles:st.cycles,quality:st.quality};
+  persistStore();
+  paintSleepPreview();
+  renderSleep();
+  if(st.quality==='良好'){
+    sleepPraise();celebrate();
+    toast('记录成功：睡眠充足，精力满分！','success',3000);
+  }else{
+    toast('睡眠偏少，高强度运动容易头晕乏力','error',3600);
+  }
+});
+
+/* ================= 个人档案 / BMI / 身体数据台账 ================= */
+function maskPhone(p){ return p?p.slice(0,3)+'****'+p.slice(7):'—'; }
+function ledgerEntries(){
+  return (DB.ledger||[]).slice().sort(function(a,b){return (a.ts||0)-(b.ts||0);});
+}
+function latestWaist(){
+  var l=ledgerEntries(),v=null;
+  for(var i=l.length-1;i>=0;i--){ if(l[i].waist){v=l[i].waist;break;} }
+  return v;
+}
+function recalcSports(){
+  cur.sports.forEach(function(s){
+    var k=sportKcal(s.name,s.minutes);
+    s.met=k.met;s.gross=k.gross;s.net=k.net;
+  });
+}
+function bmiCat(bmi){
+  if(bmi<18.5) return {cls:'low',label:'偏瘦 · 体脂过低',
+    advice:'体重偏低，建议增加优质蛋白（鸡蛋、瘦肉、奶制品）和力量训练，避免长时间空腹有氧。'};
+  if(bmi<24) return {cls:'ok',label:'健康',
+    advice:'体重处于健康范围，请继续保持规律饮食和每周 3-5 次运动。'};
+  if(bmi<28) return {cls:'warn',label:'超重 · 体脂偏高',
+    advice:'建议每周累计 150 分钟以上中等强度有氧（快走、游泳、骑行），少喝含糖饮料、少吃油炸食品。'};
+  return {cls:'bad',label:'肥胖 · 体脂过高',
+    advice:'建议从低冲击运动（快走、骑行、游泳）开始循序渐进减脂，控制精制碳水；如有基础疾病请咨询专业人士。'};
+}
+function openProfile(){
+  $('pfHeight').value=DB.profile.height;
+  $('pfWeight').value=DB.profile.weight;
+  $('pfAge').value=DB.profile.age;
+  $('pfGender').value=DB.profile.gender;
+  $('bmiBox').classList.remove('show');
+  $('lgWeight').value='';$('lgWaist').value='';
+  renderLedger();
+  $('profileMask').classList.add('show');
+}
+function closeProfile(){ $('profileMask').classList.remove('show'); }
+$('profileBtn').addEventListener('click',openProfile);
+$('weightBtn').addEventListener('click',function(){
+  openProfile();
+  var m=$('profileMask').querySelector('.modal');
+  m.scrollTop=m.scrollHeight;
+});
+$('profileClose').addEventListener('click',closeProfile);
+$('profileMask').addEventListener('click',function(e){ if(e.target===this) closeProfile(); });
+$('bmiCalcBtn').addEventListener('click',function(){
+  var h=parseFloat($('pfHeight').value),w=parseFloat($('pfWeight').value),
+    a=parseFloat($('pfAge').value),g=$('pfGender').value;
+  if(!(h>=120&&h<=220)||!(w>=30&&w<=200)||!(a>=10&&a<=100)){
+    toast('请检查身高 / 体重 / 年龄是否在合理范围','error');return;
+  }
+  DB.profile={height:h,weight:w,age:a,gender:g};
+  recalcSports();
+  persistStore();
+  var bmi=Math.round(w/Math.pow(h/100,2)*10)/10;
+  var c=bmiCat(bmi);
+  $('bmiValue').textContent=bmi;
+  var tag=$('bmiTag');
+  tag.textContent=c.label;
+  tag.className='bmi-tag '+c.cls;
+  var extra='',lw=latestWaist();
+  if(lw){
+    var risk=g==='male'?90:85;
+    extra=' 最近腰围 '+lw+' cm，'+(lw>=risk
+      ?'已达到腹型肥胖关注线（'+(g==='male'?'男':'女')+'性 ≥ '+risk+' cm），建议重点减腰围。'
+      :'处于健康范围。');
+  }
+  $('bmiAdvice').textContent='参考标准：BMI 18.5-23.9 为健康。'+c.advice+extra;
+  $('bmiBox').classList.add('show');
+  renderSports();renderOverview();
+  toast('BMI '+bmi+'：'+c.label,'success');
+});
+$('lgAdd').addEventListener('click',function(){
+  var w=parseFloat($('lgWeight').value),waistRaw=$('lgWaist').value,wa=parseFloat(waistRaw);
+  if(!(w>=30&&w<=200)){ toast('请输入 30-200 kg 的体重','error'); $('lgWeight').focus(); return; }
+  if(waistRaw!==''&&!(wa>=40&&wa<=200)){ toast('腰围请输入 40-200 cm','error'); $('lgWaist').focus(); return; }
+  if(!DB.ledger) DB.ledger=[];
+  DB.ledger.push({id:uid(),date:todayKey(),ts:Date.now(),weight:w,waist:waistRaw!==''?wa:null});
+  DB.profile.weight=w;
+  recalcSports();
+  persistStore();
+  $('lgWeight').value='';$('lgWaist').value='';
+  $('pfWeight').value=w;
+  $('bmiBox').classList.remove('show');
+  renderLedger();renderSports();renderOverview();
+  toast('已录入：体重 '+w+' kg'+(waistRaw!==''?' · 腰围 '+wa+' cm':''),'success');
+});
+$('ledgerList').addEventListener('click',function(e){
+  var b=e.target.closest('[data-lgdel]');
+  if(!b) return;
+  DB.ledger=(DB.ledger||[]).filter(function(x){return x.id!==b.dataset.lgdel;});
+  persistStore();renderLedger();
+  toast('已删除该条身体数据');
+});
+
+/* ================= 图表（SVG 手绘，无外部依赖） ================= */
+function svgBarChart(items,opt){
+  opt=opt||{};
+  var W=320,H=opt.height||150,padL=30,padR=8,padT=16,padB=24;
+  var n=items.length;
+  if(!n) return '';
+  var max=Math.max.apply(null,items.map(function(i){return i.value;}));
+  max=Math.max(30,Math.ceil(max/30)*30);
+  var y=function(v){ return padT+(1-v/max)*(H-padT-padB); };
+  var innerW=W-padL-padR,bw=Math.min(30,Math.max(6,innerW/n*0.58));
+  var grid='';
+  [0,0.5,1].forEach(function(f){
+    var v=max*f,yy=y(v);
+    grid+='<line class="grid" x1="'+padL+'" y1="'+yy.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+yy.toFixed(1)+'"/>'
+      +'<text class="lbl" x="'+(padL-4)+'" y="'+(yy+3).toFixed(1)+'" text-anchor="end">'+Math.round(v)+'</text>';
+  });
+  var bars='';
+  items.forEach(function(it,i){
+    var cx=padL+innerW/n*(i+0.5);
+    if(it.value>0){
+      var h=Math.max(2,y(0)-y(it.value));
+      bars+='<rect class="bar" x="'+(cx-bw/2).toFixed(1)+'" y="'+y(it.value).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="'+Math.min(3,bw/2)+'"><title>'+it.label+'：'+it.value+' 分钟</title></rect>';
+      if(n<=8) bars+='<text class="val" x="'+cx.toFixed(1)+'" y="'+(y(it.value)-4).toFixed(1)+'" text-anchor="middle">'+it.value+'</text>';
+    }else{
+      bars+='<rect class="bar-empty" x="'+(cx-bw/2).toFixed(1)+'" y="'+(y(0)-2).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="2" rx="1"/>';
+    }
+    bars+='<text class="lbl" x="'+cx.toFixed(1)+'" y="'+(H-7)+'" text-anchor="middle">'+it.label+'</text>';
+  });
+  return '<svg class="chart-svg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="运动总时长柱状图">'+grid+bars+'</svg>';
+}
+function svgLineChart(points,opt){
+  opt=opt||{};
+  if(!points||!points.length) return '';
+  var W=320,H=opt.height||150,padL=34,padR=14,padT=18,padB=24;
+  var vals=points.map(function(p){return p.value;});
+  var min=Math.min.apply(null,vals),max=Math.max.apply(null,vals);
+  var span=max-min;
+  if(span<0.8){ var mid=(max+min)/2;min=mid-0.6;max=mid+0.6;span=max-min; }
+  var pad=span*0.14;min-=pad;max+=pad;span=max-min;
+  var x=function(i){ return points.length===1?(W+padL-padR)/2:padL+i*(W-padL-padR)/(points.length-1); };
+  var y=function(v){ return padT+(1-(v-min)/span)*(H-padT-padB); };
+  var grid='';
+  [min,(min+max)/2,max].forEach(function(v){
+    var yy=y(v);
+    grid+='<line class="grid" x1="'+padL+'" y1="'+yy.toFixed(1)+'" x2="'+(W-padR)+'" y2="'+yy.toFixed(1)+'"/>'
+      +'<text class="lbl" x="'+(padL-5)+'" y="'+(yy+3).toFixed(1)+'" text-anchor="end">'+v.toFixed(1)+'</text>';
+  });
+  var coords=points.map(function(p,i){return [x(i),y(p.value)];});
+  var line=coords.map(function(c,i){return (i?'L':'M')+c[0].toFixed(1)+' '+c[1].toFixed(1);}).join(' ');
+  var area='M'+coords[0][0].toFixed(1)+' '+(H-padB)+' L'+coords.map(function(c){return c[0].toFixed(1)+' '+c[1].toFixed(1);}).join(' L')
+    +' L'+coords[coords.length-1][0].toFixed(1)+' '+(H-padB)+' Z';
+  var dots='';
+  points.forEach(function(p,i){
+    var c=coords[i],last=i===points.length-1;
+    dots+='<circle class="dot" cx="'+c[0].toFixed(1)+'" cy="'+c[1].toFixed(1)+'" r="'+(last?3.6:2.6)+'"><title>'+p.label+'：'+p.value+' kg</title></circle>';
+    if(last) dots+='<text class="val-strong" x="'+Math.min(W-padR-2,c[0]).toFixed(1)+'" y="'+(c[1]-8).toFixed(1)+'" text-anchor="'+(points.length===1?'middle':'end')+'">'+p.value+' kg</text>';
+  });
+  var idx=[0,Math.floor((points.length-1)/2),points.length-1].filter(function(v,i,a){return a.indexOf(v)===i;});
+  var xl='';
+  idx.forEach(function(i){
+    xl+='<text class="lbl" x="'+coords[i][0].toFixed(1)+'" y="'+(H-7)+'" text-anchor="'+(i===0?'start':(i===points.length-1?'end':'middle'))+'">'+points[i].label+'</text>';
+  });
+  return '<svg class="chart-svg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="体重变化折线图">'+grid+area+'<path class="line" d="'+line+'"/>'+dots+xl+'</svg>';
+}
+function sportMinutes(sub){
+  return (sub.sports||[]).filter(function(s){return s.done;}).reduce(function(a,s){return a+(s.minutes||0);},0);
+}
+function buildBarItems(range){
+  var items=[],week=['日','一','二','三','四','五','六'],i,d,sub,total=0;
+  if(range==='week'){
+    for(i=6;i>=0;i--){
+      d=new Date();d.setDate(d.getDate()-i);
+      sub=DB.days[todayKey(d)]&&DB.days[todayKey(d)][DB.personType];
+      var v=sub?sportMinutes(sub):0;
+      total+=v;
+      items.push({label:week[d.getDay()],value:v});
+    }
+    $('chartBarMeta').textContent='本周累计 '+total+' 分钟';
+  }else{
+    var now=new Date(),m=now.getMonth();
+    var groups=[{label:'第1周',from:1,to:7},{label:'第2周',from:8,to:14},{label:'第3周',from:15,to:21},
+      {label:'第4周',from:22,to:28},{label:'第5周',from:29,to:31}];
+    groups.forEach(function(g){
+      var v=0,day,dt;
+      for(day=g.from;day<=g.to;day++){
+        dt=new Date(now.getFullYear(),m,day);
+        if(dt.getMonth()!==m||dt>now) continue;
+        var s2=DB.days[todayKey(dt)]&&DB.days[todayKey(dt)][DB.personType];
+        if(s2) v+=sportMinutes(s2);
+      }
+      if(g.from<=now.getDate()){ items.push({label:g.label,value:v}); total+=v; }
+    });
+    $('chartBarMeta').textContent='本月累计 '+total+' 分钟（按周汇总）';
+  }
+  return items;
+}
+function buildWeightItems(){
+  var list=ledgerEntries().filter(function(e){return e.weight>0;}).slice(-20);
+  $('chartLineMeta').textContent=list.length?'最近 '+list.length+' 次记录':'暂无记录';
+  return list.map(function(e){ return {label:e.date.slice(5).replace('-','/'),value:e.weight}; });
+}
+var chartRange='week';
+function renderCharts(){
+  document.querySelectorAll('#chartTabs button').forEach(function(b){
+    b.classList.toggle('active',b.dataset.range===chartRange);
+  });
+  var bars=buildBarItems(chartRange);
+  $('barChart').innerHTML=svgBarChart(bars);
+  var pts=buildWeightItems();
+  $('lineChart').innerHTML=pts.length
+    ?svgLineChart(pts,{height:150})
+    :'<div class="ledger-empty">还没有体重记录<br>在「个人档案 → 身体数据台账」录入体重即可生成曲线</div>';
+}
+$('chartBtn').addEventListener('click',function(){
+  renderCharts();
+  $('chartMask').classList.add('show');
+});
+$('chartTabs').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-range]');
+  if(!b) return;
+  chartRange=b.dataset.range;
+  document.querySelectorAll('#chartTabs button').forEach(function(x){
+    x.classList.toggle('active',x===b);
+  });
+  renderCharts();
+});
+$('chartClose').addEventListener('click',function(){$('chartMask').classList.remove('show');});
+$('chartMask').addEventListener('click',function(e){ if(e.target===this) this.classList.remove('show'); });
+
+/* ================= 打卡记录导出（txt） ================= */
+function buildExportText(){
+  var L=[];
+  L.push('健身打卡助手 · 打卡记录');
+  L.push('导出时间：'+new Date().toLocaleString('zh-CN'));
+  L.push('账号：'+maskPhone(STORE.current));
+  L.push('体重台账：'+((DB.ledger&&DB.ledger.length)?DB.ledger.length+' 条':'暂无'));
+  L.push('');
+  var types=['pro','normal'],names={pro:'专业健身人群',normal:'普通运动爱好者'};
+  types.forEach(function(t){
+    L.push('================ '+names[t]+' ================');
+    var keys=Object.keys(DB.days||{}).sort(),count=0;
+    keys.forEach(function(k){
+      var sub=DB.days[k]&&DB.days[k][t];
+      if(!sub) return;
+      var has=sub.water||(sub.sports&&sub.sports.length)||(sub.foods&&sub.foods.length)||sub.checkedIn||sub.sleep;
+      if(!has) return;
+      count++;
+      var d=new Date(k+'T00:00:00'),week=['日','一','二','三','四','五','六'];
+      L.push('【'+k+' 周'+week[d.getDay()]+'】'+(sub.checkedIn?' 已打卡':' 未打卡'));
+      L.push('  饮水：'+sub.water+' ml / 目标 '+WATER_GOAL+' ml'+(sub.water>=WATER_GOAL?'（达标）':''));
+      var sports=sub.sports||[];
+      if(sports.length){
+        var mins=0,gross=0,done=0;
+        sports.forEach(function(x){ if(x.done){mins+=x.minutes||0;gross+=x.gross||0;done++;} });
+        L.push('  运动：'+sports.length+' 项，完成 '+done+' 项，共 '+mins+' 分钟，消耗约 '+gross+' kcal');
+        sports.forEach(function(x){
+          L.push('    - '+(x.done?'[完成] ':'[未完成] ')+x.name+' '+(x.minutes||0)+' 分钟 · 预计 '+(x.gross||0)+' kcal');
+        });
+      }else L.push('  运动：无记录');
+      var foods=sub.foods||[];
+      if(foods.length){
+        var kc=foods.reduce(function(a,f){return a+(f.kcal||0);},0);
+        var pr=foods.reduce(function(a,f){return a+(f.protein||0);},0);
+        L.push('  饮食：'+foods.length+' 项，摄入 '+kc+' kcal / 目标 '+FOOD_GOAL+' kcal，蛋白质 '+Math.round(pr*10)/10+' g');
+        foods.forEach(function(f){
+          L.push('    - '+f.name+' '+(f.grams?f.grams+' g':(f.portions||'')+' 份')+' · '+(f.kcal||0)+' kcal');
+        });
+      }else L.push('  饮食：无记录');
+      if(sub.sleep){
+        L.push('  睡眠：'+sub.sleep.bed+' 入睡 / '+sub.sleep.wake+' 起床，实际 '+fmtDur(sub.sleep.dur)
+          +'，约 '+sub.sleep.cycles+' 个周期，评价：'+sub.sleep.quality+'（半夜清醒 '+sub.sleep.awake+' 分钟）');
+      }else L.push('  睡眠：未记录');
+      L.push('');
+    });
+    if(!count) L.push('（暂无记录）');
+    L.push('');
+  });
+  L.push('================ 身体数据台账 ================');
+  var ledger=ledgerEntries();
+  if(ledger.length){
+    ledger.forEach(function(e){
+      L.push(e.date+'  体重 '+e.weight+' kg'+(e.waist?'，腰围 '+e.waist+' cm':''));
+    });
+  }else L.push('（暂无记录）');
+  L.push('');
+  L.push('说明：数据由「健身打卡助手」本机记录生成，仅作个人健康参考。');
+  return L.join('\r\n');
+}
+function downloadText(text,filename){
+  var blob=new Blob([text],{type:'text/plain;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download=filename;a.style.display='none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){
+    if(a.parentNode) a.parentNode.removeChild(a);
+    URL.revokeObjectURL(url);
+  },1500);
+}
+$('exportBtn').addEventListener('click',function(){
+  var text='\ufeff'+buildExportText();
+  var name='健身打卡记录-'+todayKey()+'.txt';
+  var blob=new Blob([text],{type:'text/plain;charset=utf-8'});
+  var file=null;
+  try{ file=new File([blob],name,{type:'text/plain'}); }catch(e){ file=null; }
+  if(file&&navigator.canShare&&navigator.canShare({files:[file]})
+    &&/Android|iPhone|iPad|iPod|Mobile|HarmonyOS/i.test(navigator.userAgent)){
+    navigator.share({files:[file],title:'健身打卡记录'}).then(function(){
+      toast('已打开分享面板，可保存到文件或相册','success');
+    }).catch(function(err){
+      if(err&&err.name==='AbortError') return;
+      downloadText(text,name);
+      toast('已导出文本文件：'+name,'success');
+    });
+  }else{
+    downloadText(text,name);
+    toast('已导出文本文件：'+name,'success');
+  }
+});
+
+/* ================= 身体数据台账渲染 ================= */
+function renderWeightTrend(list){
+  var pts=list.filter(function(e){return e.weight>0;}).slice(-12);
+  var box=$('weightTrend');
+  if(!pts.length){
+    box.innerHTML='';
+    $('trendDelta').textContent='—';
+    return;
+  }
+  var items=pts.map(function(e){
+    return {label:e.date.slice(5).replace('-','/'),value:Math.round(e.weight*10)/10};
+  });
+  box.innerHTML=svgLineChart(items,{height:140});
+  if(items.length>=2){
+    var diff=Math.round((items[items.length-1].value-items[0].value)*10)/10;
+    $('trendDelta').textContent=(diff>0?'+':'')+diff+' kg';
+    $('trendDelta').style.color='var(--t2)';
+  }else{
+    $('trendDelta').textContent='1 次记录';
+    $('trendDelta').style.color='var(--t2)';
+  }
+}
+function renderLedger(){
+  var list=ledgerEntries();
+  var wrap=$('ledgerList');
+  if(!list.length){
+    wrap.innerHTML='<div class="ledger-empty">还没有身体数据记录<br>录入体重后即可生成体重变化曲线</div>';
+  }else{
+    var recent=list.slice(-12).reverse();
+    wrap.innerHTML=recent.map(function(e){
+      return '<div class="ledger-row"><span class="ld">'+e.date.slice(5)+'</span>'
+        +'<span class="lw">'+e.weight+' kg</span>'
+        +(e.waist?'<span class="lwaist">腰围 '+e.waist+' cm</span>':'<span class="lwaist">未记腰围</span>')
+        +'<button class="del-btn" data-lgdel="'+(e.id||'')+'" aria-label="删除该条记录">'
+        +'<svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>';
+    }).join('');
+  }
+  renderWeightTrend(list);
+}
+
+/* ================= 近三个月历史（当前类型） ================= */
+$('histBtn').addEventListener('click',function(){
+  $('monthTypeHint').textContent='「'+(DB.personType==='pro'?'专业健身':'普通运动')+'」类型的近三个月记录';
+  var out=[],d=new Date();
+  for(var m=0;m<3;m++){
+    var base=new Date(d.getFullYear(),d.getMonth()-m,1);
+    out.push('<div class="month-title">'+base.getFullYear()+' 年 '+(base.getMonth()+1)+' 月</div>');
+    var daysInMonth=new Date(base.getFullYear(),base.getMonth()+1,0).getDate();
+    var startMonth=base.getMonth();
+    for(var dayN=daysInMonth;dayN>=1;dayN--){
+      var dd=new Date(base.getFullYear(),startMonth,dayN);
+      if(dd>d) continue;
+      var key=todayKey(dd);
+      var sub=DB.days[key]&&DB.days[key][DB.personType]?DB.days[key][DB.personType]:null;
+      if(!sub) continue;
+      var sk=sub.foods.reduce(function(a,f){return a+f.kcal;},0);
+      var dn=sub.sports.filter(function(s){return s.done;}).length;
+      var gross=sub.sports.filter(function(s){return s.done;}).reduce(function(a,s){return a+(s.gross||0);},0);
+      var net=sub.sports.filter(function(s){return s.done;}).reduce(function(a,s){return a+(s.net||0);},0);
+      var dayTotal=calcBMR()+net;
+      out.push('<div class="month-row detailed">'
+        +'<div class="mrow-top"><span class="md">'+(startMonth+1)+'/'+dayN+'</span>'
+        +'<span class="mplan">运动完成 '+dn+'/'+sub.sports.length+'</span>'
+        +(sub.checkedIn?'<span class="mcheck">已打卡</span>':'<span class="mcheck no">未打卡</span>')+'</div>'
+        +'<div class="mrow-grid">'
+        +'<span class="mg w">饮水 <b>'+sub.water+'</b> ml</span>'
+        +'<span class="mg s">运动消耗 <b>'+gross+'</b> kcal</span>'
+        +'<span class="mg f">饮食摄入 <b>'+sk+'</b> kcal</span>'
+        +'<span class="mg t">全天消耗 <b>'+dayTotal+'</b> kcal</span>'
+        +'<span class="mg z">睡眠 <b>'+(sub.sleep?fmtHours(sub.sleep.dur):'—')+'</b>'+(sub.sleep?' · '+sub.sleep.quality:'')+'</span>'
+        +'</div></div>');
+    }
+  }
+  $('monthList').innerHTML=out.join('');
+  $('monthMask').classList.add('show');
+});
+$('monthClose').addEventListener('click',function(){$('monthMask').classList.remove('show');});
+
+/* ================= 初始化 ================= */
+function initApp(){
+  var d=new Date(),week=['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+  $('todayLabel').textContent=today+' '+week[d.getDay()];
+  $('waterGoal').textContent=WATER_GOAL;
+  $('foodGoal').textContent=FOOD_GOAL;
+  applyType(DB.personType||'normal');
+}
+
+/* ================= 启动：每次打开都需登录（已注册信息仍保留） ================= */
+showAuthMode('pwd');
+if(STORE.current&&STORE.users[STORE.current]){
+  $('pwdAccount').value=STORE.current;
+  $('pwdPassword').focus();
+}
+/* iOS / iPadOS 直接打开本地文件时，Safari 不允许完整脚本/存储，给出明确提示 */
+if(/(iPad|iPhone|iPod)/.test(navigator.userAgent)&&location.protocol==='file:'){
+  setTimeout(function(){
+    toast('iOS/iPadOS 不能直接运行本地网页，请用同一 Wi-Fi 的网址或线上链接打开','error',9000);
+  },700);
+}
+</script>
+
+</body>
+</html>

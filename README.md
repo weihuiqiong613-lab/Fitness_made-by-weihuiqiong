@@ -45,7 +45,7 @@ README.md-健身打卡助手
 ​
 ## 本地启动步骤
 
-打开链接：[https://sparkling-pony-f16d9f.netlify.app[]]
+打开链接:https://sparkling-pony-f16d9f.netlify.app
 该链接在浏览器即可打开，电脑，手机和ipad都适用。
 打开链接之后新用户需要注册，已注册过的老用户则需要登录，方法如下：
 ​密码登录：手机号：13800138000（示例号码）+密码
